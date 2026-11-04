@@ -11,7 +11,6 @@ const T = {
   bd: { en: 'BANGLADESH', bn: 'বাংলাদেশ' },
   season: { en: 'Season', bn: 'ঋতু' },
   of: { en: 'of', bn: '/' },
-  year: { en: 'The Bangla year', bn: 'বাংলা বছর' },
   when: { en: 'When', bn: 'সময়' },
 };
 
@@ -65,9 +64,9 @@ export function SixSeasons() {
           <p className="max-w-xl text-brand-muted lg:justify-self-end">{t(T.sub)}</p>
         </motion.div>
 
-        <div className="grid items-center gap-12 lg:grid-cols-[.8fr_1.2fr] lg:gap-20" onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)}>
+        <div className="grid items-center gap-12 lg:grid-cols-[1fr_1.1fr] lg:gap-14" onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)}>
           {/* the brand mark, each shard filled with its season */}
-          <div className="relative mx-auto w-full max-w-[460px]">
+          <div className="relative mx-auto w-full max-w-[640px]">
             <svg viewBox="0 0 120 120" className="w-full overflow-visible" role="group" aria-label={t(T.ey)}>
               <defs>
                 {SEASONS.map((x) => <clipPath key={x.id} id={`ss-${x.id}`}>{x.pts.map((p) => <polygon key={p} points={p} />)}</clipPath>)}
@@ -144,24 +143,6 @@ export function SixSeasons() {
               </motion.div>
             </AnimatePresence>
 
-            {/* the Bangla year as six equal spans */}
-            <div className="mt-9">
-              <span className="kicker mb-3 block">{t(T.year)}</span>
-              <div className="flex gap-1">
-                {SEASONS.map((x, k) => {
-                  const on = k === i;
-                  return (
-                    <button key={x.id} type="button" onClick={() => setI(k)} onMouseEnter={() => setI(k)} aria-pressed={on} aria-label={t(x.name)}
-                      className={cn('group relative flex-1 overflow-hidden rounded-[3px] text-left transition-[flex-grow] duration-500 ease-brand', on && 'flex-[2.2]')}>
-                      <span className="relative block h-2 overflow-hidden rounded-[2px]" style={{ background: `${x.c}33` }}>
-                        <span className="absolute inset-0 origin-left" style={{ background: x.c, transform: on ? undefined : 'scaleX(0)', animation: on && !paused && !reduce ? `bb-grow ${DWELL}ms linear forwards` : 'none' }} />
-                      </span>
-                      <span className={cn('mt-2 block truncate text-[12.5px] transition-colors', on ? 'font-semibold text-brand-ink' : 'text-brand-muted group-hover:text-brand-ink')}>{t(x.name)}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
           </div>
         </div>
       </div>
