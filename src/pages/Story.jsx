@@ -30,8 +30,7 @@ const T = {
   visionH: { en: 'The road ahead, <em>together</em>', bn: 'সামনের পথ, <em>একসঙ্গে</em>' },
   visionP: { en: 'A confident, connected and creative Bangladesh that speaks to the world as an equal.', bn: 'আত্মবিশ্বাসী, সংযুক্ত ও উদ্ভাবনী এক বাংলাদেশ—যে বিশ্বের সঙ্গে কথা বলে সমানে সমান।' },
   film: { en: 'The Brand Film', bn: 'ব্র্যান্ড ফিল্ম' },
-  filmMeta: { en: '2:30 · with Bangla and English captions', bn: '২:৩০ মিনিট · বাংলা ও ইংরেজি সাবটাইটেলসহ' },
-  filmToast: { en: 'The brand film plays here (add the video file)', bn: 'ব্র্যান্ড ফিল্ম এখানে চলবে (ভিডিও যুক্ত করুন)' },
+  filmMeta: { en: 'Bangladesh from above · 4K', bn: 'আকাশ থেকে বাংলাদেশ · ৪কে' },
   valuesEy: { en: 'Values and promise', bn: 'মূল্যবোধ ও প্রতিশ্রুতি' },
   valuesH: { en: 'What we <em>stand for</em>', bn: 'আমরা যা <em>বিশ্বাস করি</em>' },
   promise: { en: '<strong>Our promise:</strong> to tell the story of Bangladesh honestly, beautifully and with confidence, so every visitor leaves with a more accurate and positive picture.', bn: '<strong>আমাদের প্রতিশ্রুতি:</strong> বাংলাদেশের গল্প সততা, সৌন্দর্য আর আত্মবিশ্বাসের সঙ্গে বলা—যাতে প্রত্যেক পাঠক ও দর্শক এ দেশ সম্পর্কে আরও সঠিক ও ইতিবাচক ধারণা নিয়ে ফেরেন।' },
@@ -75,7 +74,7 @@ const CHAPTERS = [
     ],
   },
   {
-    id: 'people', seed: 'bb-ch-people', no: { en: '03', bn: '০৩' }, c: '#F38020',
+    id: 'people', seed: 'bb-ch-people', no: { en: '03', bn: '০৩' }, c: '#F38020', reveal: 'rise',
     ey: { en: 'The resilience of its people', bn: 'মানুষের অদম্য প্রাণশক্তি' },
     h: { en: 'Standing up <em>after every storm</em>', bn: 'প্রতিটি ঝড়ের পর <em>আবার উঠে দাঁড়ানো</em>' },
     alt: { en: 'Fishers hauling a net together on the river', bn: 'নদীতে একসঙ্গে জাল টানছেন জেলেরা' },
@@ -88,7 +87,7 @@ const CHAPTERS = [
     ],
   },
   {
-    id: 'economy', seed: 'bb-ch-economy', no: { en: '04', bn: '০৪' }, c: '#C9A062', numbersLink: true,
+    id: 'economy', seed: 'bb-ch-economy', no: { en: '04', bn: '০৪' }, c: '#C9A062', numbersLink: true, reveal: 'blinds',
     ey: { en: 'The rise of an economy', bn: 'অর্থনীতির উত্থান' },
     h: { en: 'From the loom <em>to the world</em>', bn: 'তাঁতের সুতো থেকে <em>বিশ্ববাজারে</em>' },
     alt: { en: 'The Padma Bridge over the Padma river', bn: 'পদ্মা নদীর ওপর পদ্মা সেতু' },
@@ -162,6 +161,39 @@ function ChapterRail() {
   );
 }
 
+/** Chapter 03: editorial mask rise; the frame opens bottom-to-top while the photo drifts the other way */
+function RiseReveal({ src, alt, color }) {
+  const ref = useRef(null);
+  const inView = useInView(ref, { once: true, margin: '0px 0px -100px 0px' });
+  return (
+    <div ref={ref} className="relative">
+      <motion.div className="aspect-[4/3] overflow-hidden rounded-[5px] bg-brand-paper" initial={{ clipPath: 'inset(100% 0 0 0)' }} animate={inView ? { clipPath: 'inset(0% 0 0 0)' } : {}} transition={{ duration: 1.4, ease: [0.77, 0, 0.18, 1] }}>
+        <motion.img src={src} alt={alt} loading="lazy" className="h-full w-full object-cover" initial={{ y: '-18%', scale: 1.18 }} animate={inView ? { y: '0%', scale: 1 } : {}} transition={{ duration: 1.8, ease: [0.22, 0.8, 0.2, 1] }} />
+      </motion.div>
+      <motion.span className="absolute -bottom-2 left-0 h-[3px] w-full origin-left rounded-full" style={{ background: color }} initial={{ scaleX: 0 }} animate={inView ? { scaleX: 1 } : {}} transition={{ duration: 1, delay: 1.1, ease: [0.65, 0, 0.35, 1] }} />
+    </div>
+  );
+}
+
+/** Chapter 04: the photo rises in as five vertical blinds, staggered left to right */
+function BlindsReveal({ src, alt }) {
+  const ref = useRef(null);
+  const inView = useInView(ref, { once: true, margin: '0px 0px -100px 0px' });
+  const n = 5;
+  return (
+    <div ref={ref} className="relative aspect-[4/3] overflow-hidden rounded-[5px] bg-brand-paper" role="img" aria-label={alt}>
+      {Array.from({ length: n }, (_, k) => (
+        <motion.div
+          key={k} className="absolute inset-y-0 overflow-hidden" style={{ left: `${(k * 100) / n}%`, width: `${100 / n + 0.2}%` }}
+          initial={{ y: '100%' }} animate={inView ? { y: '0%' } : {}} transition={{ duration: 1.1, delay: k * 0.12, ease: [0.76, 0, 0.24, 1] }}
+        >
+          <motion.img src={src} alt="" loading="lazy" className="absolute inset-y-0 h-full max-w-none object-cover" style={{ left: `${-k * 100}%`, width: `${n * 100}%` }} initial={{ y: '-30%' }} animate={inView ? { y: '0%' } : {}} transition={{ duration: 1.1, delay: k * 0.12, ease: [0.76, 0, 0.24, 1] }} />
+        </motion.div>
+      ))}
+    </div>
+  );
+}
+
 function Chapter({ ch, flip }) {
   const { t } = useLang();
   return (
@@ -178,7 +210,9 @@ function Chapter({ ch, flip }) {
 
         <div className="grid items-start gap-10 lg:grid-cols-12 lg:gap-16">
           <figure className={cn('lg:col-span-7', flip && 'lg:order-2')}>
-            <RevealImage src={img(ch.seed, 1920)} alt={t(ch.alt)} className="aspect-[4/3] overflow-hidden rounded-[5px] bg-brand-paper" imgClassName="h-full w-full object-cover" />
+            {ch.reveal === 'rise' ? <RiseReveal src={img(ch.seed, 1920)} alt={t(ch.alt)} color={ch.c} />
+              : ch.reveal === 'blinds' ? <BlindsReveal src={img(ch.seed, 1920)} alt={t(ch.alt)} />
+              : <RevealImage src={img(ch.seed, 1920)} alt={t(ch.alt)} className="aspect-[4/3] overflow-hidden rounded-[5px] bg-brand-paper" imgClassName="h-full w-full object-cover" />}
             <figcaption className="mt-3 flex items-center gap-2 text-[13px] text-brand-muted"><span className="h-px w-6" style={{ background: ch.c }} /> {t(ch.alt)}</figcaption>
           </figure>
           <Reveal delay={120} className="flex flex-col gap-5 lg:col-span-5 lg:pt-4">
@@ -258,6 +292,37 @@ function Timeline() {
   );
 }
 
+// TODO: replace with the official brand film once it is produced
+const FILM_ID = 'vpWJjhLpjmU'; // "Bangladesh 4K - Scenic Relaxation Film With Traditional Music" by Scenic Relaxation on YouTube
+
+/** Poster with play button; clicking swaps in the YouTube player (no YouTube requests until then) */
+function BrandFilm() {
+  const { t } = useLang();
+  const [play, setPlay] = useState(false);
+  return (
+    <div className="relative aspect-video w-full overflow-hidden rounded-[5px] bg-brand-night shadow-[0_50px_80px_-50px_rgba(0,0,0,.6)]">
+      {play ? (
+        <iframe
+          className="absolute inset-0 h-full w-full"
+          src={`https://www.youtube-nocookie.com/embed/${FILM_ID}?autoplay=1&rel=0&modestbranding=1&playsinline=1&vq=hd2160`}
+          title={t(T.film)} allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowFullScreen
+        />
+      ) : (
+        <button type="button" onClick={() => setPlay(true)} className="group relative isolate grid h-full w-full place-items-center text-center text-white" aria-label={t(T.film)}>
+          <img src={img('bb-film', 1920)} alt="" loading="lazy" className="absolute inset-0 -z-20 h-full w-full object-cover opacity-80 transition-transform duration-[2400ms] ease-[cubic-bezier(.16,1,.3,1)] group-hover:scale-105" />
+          <span className="absolute inset-0 -z-10 bg-[radial-gradient(circle,rgba(0,0,0,.1),rgba(0,0,0,.6))]" />
+          <span>
+            <span className="play-ring relative mx-auto mb-4 grid h-[84px] w-[84px] place-items-center rounded-full bg-white text-2xl text-brand-ink transition-transform duration-500 group-hover:scale-110"><i className="fa-solid fa-play" aria-hidden="true" /></span>
+            <strong className="font-mag text-[clamp(22px,3vw,34px)] font-medium">{t(T.film)}</strong>
+            <small className="mt-1 block text-[13px] opacity-80">{t(T.filmMeta)}</small>
+          </span>
+          <span className="absolute bottom-4 right-5 inline-flex items-center gap-1.5 text-[11px] text-white/60"><i className="fa-brands fa-youtube" aria-hidden="true" /> Video: Scenic Relaxation</span>
+        </button>
+      )}
+    </div>
+  );
+}
+
 export default function Story() {
   const { t } = useLang();
   useDocumentTitle(t(T.title));
@@ -285,17 +350,7 @@ export default function Story() {
       <section id="vision" className="sec scroll-mt-24">
         <div className="container">
           <SectionHead center eyebrow={`${t({ en: '05', bn: '০৫' })} · ${t(T.visionEy)}`} title={t(T.visionH)} sub={t(T.visionP)} />
-          <Reveal>
-            <button type="button" onClick={() => toast(t(T.filmToast))} className="group relative isolate grid aspect-video w-full place-items-center overflow-hidden rounded-[5px] bg-brand-night text-center text-white" aria-label={t(T.film)}>
-              <img src={img('bb-film', 1920)} alt="" loading="lazy" className="absolute inset-0 -z-20 h-full w-full object-cover opacity-80 transition-transform duration-[2400ms] ease-[cubic-bezier(.16,1,.3,1)] group-hover:scale-105" />
-              <span className="absolute inset-0 -z-10 bg-[radial-gradient(circle,rgba(0,0,0,.1),rgba(0,0,0,.6))]" />
-              <span>
-                <span className="play-ring relative mx-auto mb-4 grid h-[84px] w-[84px] place-items-center rounded-full bg-white text-2xl text-brand-ink transition-transform duration-500 group-hover:scale-110"><i className="fa-solid fa-play" aria-hidden="true" /></span>
-                <strong className="font-mag text-[clamp(22px,3vw,34px)] font-medium">{t(T.film)}</strong>
-                <small className="mt-1 block text-[13px] opacity-80">{t(T.filmMeta)}</small>
-              </span>
-            </button>
-          </Reveal>
+          <Reveal><BrandFilm /></Reveal>
         </div>
       </section>
 

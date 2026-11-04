@@ -99,7 +99,7 @@
 @keyframes bb-kb { from { transform: scale(1.12); } to { transform: scale(1); } }
 .hero-dot { overflow: hidden; }
 .hero-dot::after { content: ''; position: absolute; inset: 0; background: #fff; transform: scaleX(0); transform-origin: left; }
-.hero-dot[aria-current='true']::after { animation: bb-dot 6s linear forwards; }
+.hero-dot[aria-current='true']::after { animation: bb-dot 3s linear forwards; }
 .hero-dot.paused[aria-current='true']::after { animation: none; transform: scaleX(1); }
 @keyframes bb-dot { to { transform: scaleX(1); } }
 

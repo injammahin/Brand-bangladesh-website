@@ -1,13 +1,25 @@
-/** The Smriti Soudho-inspired mark from the logo */
+/** The brand mark, traced from the official icon. Shared by the seasons section. */
+export const MARK = {
+  red: '2.9,120.0 49.8,52.2 23.3,120.0',
+  orange: '29.4,120.0 60.0,28.6 53.2,120.0',
+  yellow: '58.0,120.0 62.4,16.7 70.3,120.0',
+  teal: '63.1,11.6 68.2,17.7 78.1,120.0 70.9,120.0',
+  green: '69.6,0.0 92.0,55.8 85.1,52.4 72.2,26.9',
+  blackTop: '72.5,27.2 84.5,52.1 74.7,50.0',
+  black: '75.3,52.7 88.1,57.1 82.5,113.9 81.6,113.9',
+  pink: '88.0,58.6 92.9,57.6 117.1,120.0 83.1,120.0',
+};
+
 export function Monument({ className, animated = false, ...props }) {
   const parts = [
-    ['#D71920', '14,112 48,56 36,112', 0.05],
-    ['#F38020', '38,112 55,32 52,112', 0.15],
-    ['#FBC111', '54,112 58,24 61,112', 0.25],
-    ['#0E5B5C', '63,112 60,12 65,12 69,112', 0.35],
-    ['#141414', '68,26 84,58 71,62', 0.55],
-    ['#EE1B5B', '71,66 88,62 104,112 72,112', 0.45],
-    ['#A4CB3A', '66,4 88,52 84,54 67,18', 0.7],
+    ['#D71920', MARK.red, 0.05],
+    ['#F38020', MARK.orange, 0.15],
+    ['#FBC111', MARK.yellow, 0.25],
+    ['#0E5B5C', MARK.teal, 0.35],
+    ['#141414', MARK.black, 0.45],
+    ['#EE1B5B', MARK.pink, 0.5],
+    ['#141414', MARK.blackTop, 0.6],
+    ['#A4CB3A', MARK.green, 0.7],
   ];
   return (
     <svg viewBox="0 0 120 120" className={className} aria-hidden="true" focusable="false" {...props}>

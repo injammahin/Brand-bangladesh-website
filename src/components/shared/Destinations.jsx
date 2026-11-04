@@ -26,7 +26,7 @@ const PLACES = [
   { photo: 'guava_2', to: '/regions/barishal', tag: { en: 'River life', bn: 'নদীর জীবন' }, name: { en: 'Floating markets', bn: 'ভাসমান বাজার' }, region: { en: 'Barishal', bn: 'বরিশাল' }, fact: { en: 'In guava season, farmers trade straight from their boats on the canals around Pirojpur and Jhalokati.', bn: 'পেয়ারার মৌসুমে পিরোজপুর-ঝালকাঠির খালে নৌকা থেকেই চলে বেচাকেনা।' } },
 ];
 
-const DWELL = 4200; // ms each destination stays centred
+const DWELL = 2000; // ms each destination stays centred
 
 /** Centred 3D carousel: active card in front, neighbours fan out; loops endlessly in both directions */
 export function Destinations() {
@@ -36,7 +36,22 @@ export function Destinations() {
   const [pos, setPos] = useState(0); // unbounded, so the loop never jumps back
   const [paused, setPaused] = useState(false);
   const drag = useRef(null);
+  const stage = useRef(null);
+  const [cw, setCw] = useState(1440);
   const active = ((pos % n) + n) % n;
+
+  // size cards from the stage width so the whole fan fits on every screen
+  useEffect(() => {
+    const el = stage.current; if (!el) return;
+    const ro = new ResizeObserver(([e]) => setCw(e.contentRect.width));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+  const small = cw < 768;
+  const STEP = small ? 0.78 : 0.62; // horizontal offset per card, as a share of card width
+  const SIDE = small ? 1 : 3; // neighbours shown on each side
+  const cardW = Math.min(390, small ? cw * 0.68 : (cw / 2 - 24) / (0.5 + SIDE * STEP));
+  const cardH = cardW * 1.42;
 
   useEffect(() => {
     if (paused || reduce) return;
@@ -68,7 +83,7 @@ export function Destinations() {
       </div>
 
       <div
-        className="relative mx-auto h-[clamp(440px,42vw,600px)] touch-pan-y select-none [perspective:1800px]"
+        ref={stage} className="relative mx-auto touch-pan-y select-none [perspective:1800px]" style={{ height: cardH + 20 }}
         onMouseEnter={() => setPaused(true)} onMouseLeave={() => { setPaused(false); drag.current = null; }}
         onPointerDown={onDown} onPointerUp={onUp}
       >
@@ -79,16 +94,17 @@ export function Destinations() {
           if (d < -n / 2) d += n;
           const ad = Math.abs(d);
           const on = d === 0;
-          const hidden = ad > 3;
+          const hidden = ad > SIDE;
           return (
             <div
               key={p.name.en}
-              className="absolute left-1/2 top-0 h-full w-[clamp(260px,27vw,390px)]"
+              className="absolute left-1/2 top-0"
               style={{
-                transform: `translateX(-50%) translateX(${d * 62}%) translateZ(${-ad * 140}px) rotateY(${-d * 18}deg)`,
+                width: cardW, height: cardH,
+                transform: `translateX(-50%) translateX(${d * STEP * 100}%) translateZ(${-ad * cardW * 0.36}px) rotateY(${-d * 18}deg)`,
                 zIndex: 20 - ad,
                 opacity: hidden ? 0 : 1,
-                transition: 'transform 1.1s cubic-bezier(.22,.8,.2,1), opacity .8s, filter 1s',
+                transition: 'transform .85s cubic-bezier(.22,.8,.2,1), opacity .6s, filter .8s',
                 filter: on ? 'none' : `brightness(${1 - ad * 0.18}) saturate(${1 - ad * 0.15})`,
                 pointerEvents: hidden ? 'none' : 'auto',
               }}
@@ -108,7 +124,7 @@ export function Destinations() {
                 </div>
                 <div className="p-6">
                   <span className="inline-flex items-center gap-1.5 text-xs text-white/75"><i className="fa-solid fa-location-dot text-brand-yellow" aria-hidden="true" /> {t(p.region)}</span>
-                  <h3 className="mt-1 font-mag text-[clamp(28px,2.6vw,40px)] font-medium leading-tight [html[lang=bn]_&]:font-normal">{t(p.name)}</h3>
+                  <h3 className="mt-1 font-mag text-[clamp(24px,2.4vw,40px)] font-medium leading-tight [html[lang=bn]_&]:font-normal">{t(p.name)}</h3>
                   <div className={cn('grid transition-[grid-template-rows,opacity] duration-700 ease-brand', on ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0')}>
                     <div className="overflow-hidden">
                       <p className="mt-3 border-t border-white/20 pt-3 text-[13.5px] leading-relaxed text-white/85">

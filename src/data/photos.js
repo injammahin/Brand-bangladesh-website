@@ -4,6 +4,12 @@
  * Before launch, swap for approved photography served from the project CDN.
  */
 export const PHOTOS = {
+  sea_grishma: ["client-supplied/sea_grishma.jpg", 1200, 675], // supplied by the client
+  sea_shorot: ["client-supplied/sea_shorot.jpg", 800, 472], // supplied by the client
+  sea_bosonto: ["client-supplied/sea_bosonto.jpg", 552, 362], // supplied by the client
+  sea_sheet: ["client-supplied/sea_sheet.jpg", 547, 365], // supplied by the client
+  sea_hemonto: ["client-supplied/sea_hemonto.jpg", 900, 519], // supplied by the client
+  sea_borsha: ["client-supplied/sea_borsha.jpg", 678, 452], // supplied by the client
   lalbagh_pb: ["1/17/Back_view_of_tomb_of_paribibi.jpg", 4983, 3531],
   bichana: ["b/b6/Bichnakandi,_Sylhet.jpg", 6000, 4000],
   riversun: ["1/1d/River_sunset_in_Bangladesh.jpg", 4608, 3456],

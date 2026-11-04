@@ -20,6 +20,7 @@ import { Watermark } from '@/components/shared/Watermark';
 import { useIntroDone } from '@/components/layout/Loader';
 import { BrandHexagon } from '@/components/shared/BrandHexagon';
 import { Destinations } from '@/components/shared/Destinations';
+import { SixSeasons } from '@/components/shared/SixSeasons';
 
 const T = {
   title: { en: 'Brand Bangladesh — The story of a nation', bn: 'ব্র্যান্ড বাংলাদেশ — একটি জাতির গল্প' },
@@ -62,7 +63,7 @@ function Hero() {
 
   useEffect(() => {
     if (paused) return;
-    const id = setTimeout(() => setI((v) => (v + 1) % slides.length), 6000);
+    const id = setTimeout(() => setI((v) => (v + 1) % slides.length), 3000);
     return () => clearTimeout(id);
   }, [i, paused, slides.length]);
 
@@ -86,7 +87,7 @@ function Hero() {
     >
       <motion.div className="absolute -inset-8 -z-20" style={{ x: px, y: py }} initial={{ scale: 1.15 }} animate={ready ? { scale: 1 } : undefined} transition={{ duration: 2.2, ease: [0.22, 0.8, 0.2, 1] }}>
         <AnimatePresence initial={false}>
-          <motion.div key={i} className="absolute inset-0" initial={{ opacity: 0, scale: 1.08, clipPath: 'inset(0 0 0 100%)' }} animate={{ opacity: 1, scale: 1, clipPath: 'inset(0 0 0 0%)' }} exit={{ opacity: 0.6 }} transition={{ duration: 1.5, ease: [0.76, 0, 0.24, 1] }}>
+          <motion.div key={i} className="absolute inset-0" initial={{ opacity: 0, scale: 1.08, clipPath: 'inset(0 0 0 100%)' }} animate={{ opacity: 1, scale: 1, clipPath: 'inset(0 0 0 0%)' }} exit={{ opacity: 0.6 }} transition={{ duration: 1, ease: [0.76, 0, 0.24, 1] }}>
             <img src={img(slides[i].seed, 1920)} srcSet={slides[i].seed === 'bichana' ? '/photos/bichana-960.jpg 960w, /photos/bichana-1920.jpg 1920w, /photos/bichana-2880.jpg 2880w' : undefined} sizes="100vw" alt="" width="1920" height="1280" fetchpriority={i === 0 ? 'high' : 'auto'} className={cn('h-full w-full object-cover', !paused && 'kenburns')} />
           </motion.div>
         </AnimatePresence>
@@ -215,6 +216,8 @@ export default function Home() {
       <BrandHexagon />
 
       <Destinations />
+
+      <SixSeasons />
 
       <section className="sec nakshi relative isolate overflow-hidden bg-brand-cream">
         <div className="container">
