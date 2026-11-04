@@ -16,6 +16,8 @@ import { IssueCover } from '@/components/shared/IssueCover';
 import { BdMap, RegionPanel } from '@/components/shared/BdMap';
 import { NewsletterForm } from '@/components/shared/NewsletterForm';
 import { Monument } from '@/components/shared/Monument';
+import { Watermark } from '@/components/shared/Watermark';
+import { useIntroDone } from '@/components/layout/Loader';
 import { BrandHexagon } from '@/components/shared/BrandHexagon';
 import { Destinations } from '@/components/shared/Destinations';
 
@@ -52,6 +54,7 @@ const T = {
 
 function Hero() {
   const { t, num } = useLang();
+  const ready = useIntroDone();
   const reduce = useReducedMotion();
   const slides = content.heroSlides;
   const [i, setI] = useState(0);
@@ -81,7 +84,7 @@ function Hero() {
       className="grain on-dark relative isolate flex min-h-[calc(100svh-var(--header-h)-3px)] items-end overflow-hidden bg-black text-white"
       aria-label={t(T.eyebrow)}
     >
-      <motion.div className="absolute -inset-8 -z-20" style={{ x: px, y: py }}>
+      <motion.div className="absolute -inset-8 -z-20" style={{ x: px, y: py }} initial={{ scale: 1.15 }} animate={ready ? { scale: 1 } : undefined} transition={{ duration: 2.2, ease: [0.22, 0.8, 0.2, 1] }}>
         <AnimatePresence initial={false}>
           <motion.div key={i} className="absolute inset-0" initial={{ opacity: 0, scale: 1.08, clipPath: 'inset(0 0 0 100%)' }} animate={{ opacity: 1, scale: 1, clipPath: 'inset(0 0 0 0%)' }} exit={{ opacity: 0.6 }} transition={{ duration: 1.5, ease: [0.76, 0, 0.24, 1] }}>
             <img src={img(slides[i].seed, 1920)} alt="" width="1920" height="1280" fetchpriority={i === 0 ? 'high' : 'auto'} className={cn('h-full w-full object-cover', !paused && 'kenburns')} />
@@ -101,21 +104,21 @@ function Hero() {
       </div>
 
       <motion.div className="container relative z-[2] pb-8 pt-28 lg:pb-12" style={{ y: contentY, opacity: contentO }}>
-        <motion.span className="eyebrow text-brand-goldsoft" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.3, duration: 0.8, ease }}>{t(T.eyebrow)}</motion.span>
+        <motion.span className="eyebrow text-brand-goldsoft" initial={{ opacity: 0, x: -20 }} animate={ready ? { opacity: 1, x: 0 } : undefined} transition={{ delay: 0.15, duration: 0.8, ease }}>{t(T.eyebrow)}</motion.span>
         <h1 className="display my-5 max-w-5xl text-[clamp(44px,8.4vw,112px)]">
           {lines.map((l, k) => (
             <span key={k} className="line-mask">
-              <motion.span className="block" initial={{ y: '110%', rotate: 2 }} animate={{ y: '0%', rotate: 0 }} transition={{ delay: 0.45 + k * 0.14, duration: 1.1, ease }} dangerouslySetInnerHTML={{ __html: l }} />
+              <motion.span className="block" initial={{ y: '110%', rotate: 2 }} animate={ready ? { y: '0%', rotate: 0 } : undefined} transition={{ delay: 0.25 + k * 0.14, duration: 1.1, ease }} dangerouslySetInnerHTML={{ __html: l }} />
             </span>
           ))}
         </h1>
-        <motion.p className="lead mb-8 max-w-2xl text-white/85" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.85, duration: 0.9, ease }}>{t(T.lead)}</motion.p>
-        <motion.div className="flex flex-wrap gap-3" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1, duration: 0.9, ease }}>
+        <motion.p className="lead mb-8 max-w-2xl text-white/85" initial={{ opacity: 0, y: 20 }} animate={ready ? { opacity: 1, y: 0 } : undefined} transition={{ delay: 0.65, duration: 0.9, ease }}>{t(T.lead)}</motion.p>
+        <motion.div className="flex flex-wrap gap-3" initial={{ opacity: 0, y: 20 }} animate={ready ? { opacity: 1, y: 0 } : undefined} transition={{ delay: 0.8, duration: 0.9, ease }}>
           <Button asChild variant="light" size="lg" className="btn-shine"><Link to="/story">{t(T.discover)} <i className="fa-solid fa-arrow-right" aria-hidden="true" /></Link></Button>
           <Button asChild variant="outline-light" size="lg"><a href="#pillars">{t(T.explorePillars)}</a></Button>
         </motion.div>
 
-        <motion.div className="mt-12 flex flex-wrap items-end justify-between gap-6 border-t border-white/15 pt-5" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.2, duration: 1 }}>
+        <motion.div className="mt-12 flex flex-wrap items-end justify-between gap-6 border-t border-white/15 pt-5" initial={{ opacity: 0 }} animate={ready ? { opacity: 1 } : undefined} transition={{ delay: 1, duration: 1 }}>
           <AnimatePresence mode="wait">
             <motion.span key={i} className="inline-flex items-center gap-2.5 text-[13.5px] text-white/85" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.4 }}>
               <span className="grid h-7 w-7 place-items-center rounded-full bg-white/10 backdrop-blur"><i className="fa-solid fa-location-dot text-[11px] text-brand-yellow" aria-hidden="true" /></span>
@@ -164,7 +167,8 @@ function LatestIssue() {
   const { t, u, num, mins } = useLang();
   const issue = content.issues[0];
   return (
-    <section className="sec">
+    <section className="sec relative isolate overflow-hidden">
+      <Watermark className="-bottom-16 right-[4%] h-[560px] w-[560px]" opacity={0.1} />
       <div className="container grid items-center gap-10 lg:grid-cols-[420px_1fr] lg:gap-20">
         <Reveal>
           <Link to={`/publication/${issue.id}`} className="group mx-auto block w-full max-w-[420px] [perspective:1400px]" aria-label={t(issue.title)}>
@@ -212,7 +216,7 @@ export default function Home() {
 
       <Destinations />
 
-      <section className="sec bg-brand-cream">
+      <section className="sec nakshi relative isolate overflow-hidden bg-brand-cream">
         <div className="container">
           <SectionHead eyebrow={t(T.storiesEy)} title={t(T.storiesH)} action={<LinkArrow to="/numbers">{t(T.storiesLink)}</LinkArrow>} />
           <FeaturedStories stories={content.stories.slice(0, 5)} />

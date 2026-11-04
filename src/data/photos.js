@@ -4,6 +4,7 @@
  * Before launch, swap for approved photography served from the project CDN.
  */
 export const PHOTOS = {
+  riversun: ["1/1d/River_sunset_in_Bangladesh.jpg", 4608, 3456],
   ratar_0: ["c/ce/Ratargul_785_retouched.jpg", 4000, 2773],
   ratar_1: ["9/9b/Ratargul_0276.jpg", 3900, 2761],
   ratar_2: ["7/7d/Ratargul-02.jpg", 5330, 3687],
@@ -97,7 +98,7 @@ export const SEEDS = {
   // community
   'bb-community': 'boatrace_1', 'bb-c-mybd': 'paddy_0', 'bb-c-taste': 'hilsa_1', 'bb-c-photo': 'shapla_1', 'bb-c-amb': 'shaheed_1', 'bb-c-poll': 'student_0',
   // brand story
-  'bb-story-delta': 'ratar_1', 'bb-ch-land': 'boat_0', 'bb-ch-history': 'smriti_1', 'bb-ch-people': 'fisher_3', 'bb-ch-economy': 'padma_2',
+  'bb-story-delta': 'riversun', 'bb-ch-land': 'boat_0', 'bb-ch-history': 'smriti_1', 'bb-ch-people': 'fisher_3', 'bb-ch-economy': 'padma_2',
   'bb-film': 'cox_1', 'bb-about': 'smriti_2',
 };
 
