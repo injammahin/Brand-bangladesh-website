@@ -4,6 +4,8 @@
  * Before launch, swap for approved photography served from the project CDN.
  */
 export const PHOTOS = {
+  lalbagh_pb: ["1/17/Back_view_of_tomb_of_paribibi.jpg", 4983, 3531],
+  bichana: ["b/b6/Bichnakandi,_Sylhet.jpg", 6000, 4000],
   riversun: ["1/1d/River_sunset_in_Bangladesh.jpg", 4608, 3456],
   ratar_0: ["c/ce/Ratargul_785_retouched.jpg", 4000, 2773],
   ratar_1: ["9/9b/Ratargul_0276.jpg", 3900, 2761],
@@ -93,7 +95,7 @@ export const SEEDS = {
   'bb-i-sundarban': 'sunddeer_0', 'bb-i-heritage': 'kantajew_3', 'bb-i-tourism': 'stmartin_0', 'bb-i-food': 'food_2',
   'bb-i-rivers': 'boatrace_2', 'bb-i-makers': 'jamdani_3', 'bb-i-young': 'kids_0', 'bb-i-boishakh': 'boishakh_1',
   // regions
-  'bb-r-dhaka': 'hatir_0', 'bb-r-chattogram': 'kaptai_2', 'bb-r-khulna': 'bagerhat_1', 'bb-r-rajshahi': 'paharpur_1',
+  'bb-r-dhaka': 'lalbagh_pb', 'bb-r-chattogram': 'kaptai_2', 'bb-r-khulna': 'bagerhat_1', 'bb-r-rajshahi': 'paharpur_1',
   'bb-r-sylhet': 'lalakhal_1', 'bb-r-barishal': 'guava_2', 'bb-r-rangpur': 'tajhat_2', 'bb-r-mymensingh': 'fisher_2',
   // community
   'bb-community': 'boatrace_1', 'bb-c-mybd': 'paddy_0', 'bb-c-taste': 'hilsa_1', 'bb-c-photo': 'shapla_1', 'bb-c-amb': 'shaheed_1', 'bb-c-poll': 'student_0',

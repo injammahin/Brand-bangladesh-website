@@ -1,6 +1,6 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { useReducedMotion } from 'framer-motion';
 import { useLang } from '@/context/LanguageContext';
 import { cn, img, pad } from '@/lib/utils';
 
@@ -26,99 +26,110 @@ const PLACES = [
   { photo: 'guava_2', to: '/regions/barishal', tag: { en: 'River life', bn: 'নদীর জীবন' }, name: { en: 'Floating markets', bn: 'ভাসমান বাজার' }, region: { en: 'Barishal', bn: 'বরিশাল' }, fact: { en: 'In guava season, farmers trade straight from their boats on the canals around Pirojpur and Jhalokati.', bn: 'পেয়ারার মৌসুমে পিরোজপুর-ঝালকাঠির খালে নৌকা থেকেই চলে বেচাকেনা।' } },
 ];
 
-/** Full-bleed, drag/scroll destination rail with a "Did you know?" fact on each card */
+const DWELL = 4200; // ms each destination stays centred
+
+/** Centred 3D carousel: active card in front, neighbours fan out; loops endlessly in both directions */
 export function Destinations() {
   const { t, num } = useLang();
-  const rail = useRef(null);
+  const reduce = useReducedMotion();
+  const n = PLACES.length;
+  const [pos, setPos] = useState(0); // unbounded, so the loop never jumps back
+  const [paused, setPaused] = useState(false);
   const drag = useRef(null);
-  const anim = useRef(0);
-  const [moved, setMoved] = useState(false);
+  const active = ((pos % n) + n) % n;
 
-  // eased glide to a scroll position (native smooth scroll feels abrupt with large jumps)
-  const glide = (to, ms = 1100) => {
-    const el = rail.current; if (!el) return;
-    cancelAnimationFrame(anim.current);
-    const from = el.scrollLeft, t0 = performance.now();
-    const ease = (x) => 1 - Math.pow(1 - x, 4);
-    const step = (now) => {
-      const p = Math.min(1, (now - t0) / ms);
-      el.scrollLeft = from + (to - from) * ease(p);
-      if (p < 1) anim.current = requestAnimationFrame(step);
-    };
-    anim.current = requestAnimationFrame(step);
-  };
-  const cardW = () => { const c = rail.current?.firstElementChild; return c ? c.getBoundingClientRect().width + 16 : 300; };
-  const by = (dir) => { const el = rail.current; glide(Math.round((el.scrollLeft + dir * cardW()) / cardW()) * cardW()); };
+  useEffect(() => {
+    if (paused || reduce) return;
+    const id = setTimeout(() => setPos((p) => p + 1), DWELL);
+    return () => clearTimeout(id);
+  }, [pos, paused, reduce]);
 
-  // mouse drag with momentum
-  const down = (e) => {
-    if (e.pointerType !== 'mouse') return;
-    cancelAnimationFrame(anim.current);
-    drag.current = { x: e.clientX, left: rail.current.scrollLeft, lastX: e.clientX, lastT: performance.now(), v: 0 };
-    setMoved(false);
-  };
-  const move = (e) => {
-    const d = drag.current; if (!d) return;
-    const dx = e.clientX - d.x;
-    if (Math.abs(dx) > 5) setMoved(true);
-    const now = performance.now();
-    d.v = (e.clientX - d.lastX) / Math.max(1, now - d.lastT);
-    d.lastX = e.clientX; d.lastT = now;
-    rail.current.scrollLeft = d.left - dx;
-  };
-  const up = () => {
-    const d = drag.current; if (!d) return;
+  const go = (d) => setPos((p) => p + d);
+  const onDown = (e) => { drag.current = e.clientX; };
+  const onUp = (e) => {
+    if (drag.current == null) return;
+    const dx = e.clientX - drag.current;
     drag.current = null;
-    const el = rail.current, w = cardW();
-    const target = el.scrollLeft - d.v * 420; // fling distance from release speed
-    glide(Math.round(target / w) * w, 900);
+    if (Math.abs(dx) > 50) go(dx < 0 ? 1 : -1);
   };
 
   return (
-    <section className="overflow-hidden bg-brand-paper py-20 lg:py-28" aria-labelledby="dest-h">
-      <div className="container mb-10 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
+    <section className="overflow-hidden bg-brand-paper py-20 lg:py-28" aria-labelledby="dest-h" aria-roledescription="carousel">
+      <div className="container mb-12 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
         <div className="flex flex-col gap-3">
           <span className="eyebrow">{t(T.ey)}</span>
           <h2 id="dest-h" className="display-md max-w-3xl [&_em]:block" dangerouslySetInnerHTML={{ __html: t(T.h) }} />
         </div>
-        <div className="flex items-center gap-2">
-          <button type="button" className="hdr-btn hdr-dark h-12 w-12" onClick={() => by(-1)} aria-label={t(T.prev)}><i className="fa-solid fa-arrow-left" aria-hidden="true" /></button>
-          <button type="button" className="hdr-btn hdr-dark h-12 w-12" onClick={() => by(1)} aria-label={t(T.next)}><i className="fa-solid fa-arrow-right" aria-hidden="true" /></button>
+        <div className="flex items-center gap-4">
+          <span className="font-mag text-2xl text-brand-ink">{num(pad(active + 1))} <span className="text-brand-muted">/ {num(pad(n))}</span></span>
+          <button type="button" className="hdr-btn hdr-dark h-12 w-12" onClick={() => go(-1)} aria-label={t(T.prev)}><i className="fa-solid fa-arrow-left" aria-hidden="true" /></button>
+          <button type="button" className="hdr-btn hdr-dark h-12 w-12" onClick={() => go(1)} aria-label={t(T.next)}><i className="fa-solid fa-arrow-right" aria-hidden="true" /></button>
         </div>
       </div>
 
       <div
-        ref={rail}
-        onPointerDown={down} onPointerMove={move} onPointerUp={up} onPointerLeave={up}
-        onClickCapture={(e) => moved && (e.preventDefault(), e.stopPropagation())}
-        className="hide-scrollbar flex cursor-grab snap-x snap-mandatory scroll-px-[var(--gutter)] gap-4 overflow-x-auto px-[var(--gutter)] pb-2 active:cursor-grabbing md:snap-none"
+        className="relative mx-auto h-[clamp(440px,42vw,600px)] touch-pan-y select-none [perspective:1800px]"
+        onMouseEnter={() => setPaused(true)} onMouseLeave={() => { setPaused(false); drag.current = null; }}
+        onPointerDown={onDown} onPointerUp={onUp}
       >
-        {PLACES.map((p, k) => (
-          <motion.div key={p.name.en} className="w-[78vw] shrink-0 snap-start sm:w-[44vw] lg:w-[27vw] 2xl:w-[22vw]" initial={{ opacity: 0, x: 60 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ delay: (k % 4) * 0.1, duration: 0.8, ease: [0.22, 0.8, 0.2, 1] }}>
-            <Link to={p.to} draggable={false} className="group relative isolate flex aspect-[3/4] flex-col justify-end overflow-hidden rounded-[5px] text-white shadow-[0_30px_50px_-30px_rgba(0,0,0,.45)]">
-              <img src={img(p.photo, 960)} alt={t(p.name)} draggable={false} loading="lazy" className="absolute inset-0 -z-20 h-full w-full select-none object-cover transition-transform duration-[2400ms] ease-[cubic-bezier(.16,1,.3,1)] will-change-transform group-hover:scale-[1.06]" />
-              <div className="absolute inset-0 -z-10 bg-gradient-to-t from-black/90 via-black/20 to-black/10" />
-              <div className="absolute inset-x-5 top-5 flex items-center justify-between">
-                <span className="rounded-full bg-white/15 px-3 py-1 text-xs font-medium backdrop-blur-md">{t(p.tag)}</span>
-                <span className="font-mag text-lg text-white/70">{num(pad(k + 1))}</span>
-              </div>
-              <div className="p-6">
-                <span className="inline-flex items-center gap-1.5 text-xs text-white/70"><i className="fa-solid fa-location-dot text-brand-yellow" aria-hidden="true" /> {t(p.region)}</span>
-                <h3 className="mt-1 font-mag text-[clamp(28px,2.6vw,40px)] font-medium leading-tight [html[lang=bn]_&]:font-normal">{t(p.name)}</h3>
-                <div className="grid grid-rows-[1fr] transition-[grid-template-rows] duration-700 ease-[cubic-bezier(.16,1,.3,1)] lg:grid-rows-[0fr] lg:group-hover:grid-rows-[1fr]">
-                  <div className="overflow-hidden">
-                    <p className="mt-3 border-t border-white/20 pt-3 text-[13.5px] leading-relaxed text-white/85">
-                      <b className="mb-1 block text-[11px] font-semibold uppercase tracking-[.18em] text-brand-yellow [html[lang=bn]_&]:normal-case [html[lang=bn]_&]:tracking-normal">{t(T.dyk)}</b>
-                      {t(p.fact)}
-                    </p>
+        {PLACES.map((p, k) => {
+          // shortest signed distance from the active card, so cards wrap around the back
+          let d = (k - active) % n;
+          if (d > n / 2) d -= n;
+          if (d < -n / 2) d += n;
+          const ad = Math.abs(d);
+          const on = d === 0;
+          const hidden = ad > 3;
+          return (
+            <div
+              key={p.name.en}
+              className="absolute left-1/2 top-0 h-full w-[clamp(260px,27vw,390px)]"
+              style={{
+                transform: `translateX(-50%) translateX(${d * 62}%) translateZ(${-ad * 140}px) rotateY(${-d * 18}deg)`,
+                zIndex: 20 - ad,
+                opacity: hidden ? 0 : 1,
+                transition: 'transform 1.1s cubic-bezier(.22,.8,.2,1), opacity .8s, filter 1s',
+                filter: on ? 'none' : `brightness(${1 - ad * 0.18}) saturate(${1 - ad * 0.15})`,
+                pointerEvents: hidden ? 'none' : 'auto',
+              }}
+              aria-hidden={!on}
+            >
+              <Link
+                to={p.to} draggable={false}
+                onClick={(e) => { if (!on) { e.preventDefault(); go(d); } }}
+                tabIndex={on ? 0 : -1}
+                className={cn('group relative isolate flex h-full flex-col justify-end overflow-hidden rounded-[5px] text-white transition-shadow duration-700', on ? 'shadow-[0_50px_80px_-40px_rgba(0,0,0,.65)]' : 'shadow-[0_30px_50px_-35px_rgba(0,0,0,.5)]')}
+              >
+                <img src={img(p.photo, 960)} alt={t(p.name)} draggable={false} loading="lazy" className={cn('absolute inset-0 -z-20 h-full w-full object-cover transition-transform duration-[4000ms] ease-out', on ? 'scale-110' : 'scale-100')} />
+                <div className="absolute inset-0 -z-10 bg-gradient-to-t from-black/90 via-black/20 to-black/10" />
+                <div className="absolute inset-x-5 top-5 flex items-center justify-between">
+                  <span className="rounded-full bg-white/15 px-3 py-1 text-xs font-medium backdrop-blur-md">{t(p.tag)}</span>
+                  <span className="font-mag text-lg text-white/80">{num(pad(k + 1))}</span>
+                </div>
+                <div className="p-6">
+                  <span className="inline-flex items-center gap-1.5 text-xs text-white/75"><i className="fa-solid fa-location-dot text-brand-yellow" aria-hidden="true" /> {t(p.region)}</span>
+                  <h3 className="mt-1 font-mag text-[clamp(28px,2.6vw,40px)] font-medium leading-tight [html[lang=bn]_&]:font-normal">{t(p.name)}</h3>
+                  <div className={cn('grid transition-[grid-template-rows,opacity] duration-700 ease-brand', on ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0')}>
+                    <div className="overflow-hidden">
+                      <p className="mt-3 border-t border-white/20 pt-3 text-[13.5px] leading-relaxed text-white/85">
+                        <b className="mb-1 block text-[11px] font-semibold uppercase tracking-[.18em] text-brand-yellow [html[lang=bn]_&]:normal-case [html[lang=bn]_&]:tracking-normal">{t(T.dyk)}</b>
+                        {t(p.fact)}
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </div>
-              <span className={cn('absolute bottom-6 right-6 grid h-11 w-11 place-items-center rounded-full bg-white text-black transition-all duration-500 ease-brand', 'translate-y-3 opacity-0 duration-700 group-hover:translate-y-0 group-hover:opacity-100')}>
-                <i className="fa-solid fa-arrow-up-right-from-square text-xs" aria-hidden="true" />
-              </span>
-            </Link>
-          </motion.div>
+                {/* time-left bar on the active card */}
+                {on && !reduce && <span key={`${pos}-${paused}`} className="absolute inset-x-0 bottom-0 h-[3px] origin-left bg-brand-yellow" style={{ animation: paused ? 'none' : `bb-grow ${DWELL}ms linear forwards`, transform: paused ? 'scaleX(1)' : undefined }} />}
+              </Link>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* dots */}
+      <div className="mt-10 flex justify-center gap-2">
+        {PLACES.map((p, k) => (
+          <button key={p.name.en} type="button" onClick={() => go(((k - active + n + n / 2) % n) - n / 2 | 0)} aria-label={t(p.name)} className={cn('h-1.5 rounded-full transition-all duration-500', k === active ? 'stripe w-10' : 'w-1.5 bg-brand-ink/25 hover:bg-brand-ink/50')} />
         ))}
       </div>
     </section>

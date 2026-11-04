@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { AnimatePresence, motion, useInView } from 'framer-motion';
 import { DIVISIONS, MAP_H, MAP_W } from '@/data/bdMapPaths';
@@ -9,69 +9,86 @@ import { useLang } from '@/context/LanguageContext';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 
-// soft brand tints so each division reads as its own place
+// soft brand tints so each division reads as its own place, plus a darker shade for the slab's side wall
 const TINT = { rangpur: '#F6E3C5', rajshahi: '#F9D9CC', mymensingh: '#DCEBD3', sylhet: '#CFE6DF', dhaka: '#F3D4DC', khulna: '#D5E6E2', barishal: '#D9E3F0', chattogram: '#E9E1F0' };
+const SIDE = { rangpur: '#D9BF97', rajshahi: '#DDB2A2', mymensingh: '#B3CBA6', sylhet: '#A3C6BB', dhaka: '#D3A7B3', khulna: '#A9C5BF', barishal: '#AFBFD6', chattogram: '#C4B5D2' };
 // nudge labels where the shape's centre is awkward (long Chattogram strip, coastal Khulna)
 const LABEL = { chattogram: [410, 520], khulna: [150, 430], barishal: [262, 500] };
+const BASE = 5; // every division is a thin slab
+const LIFT = 26; // the selected one rises this far
+const ty = (y) => ({ transform: `translateY(${y}px)`, transition: 'transform .75s cubic-bezier(.22,1.2,.36,1), opacity .6s' });
 
-/** Map of the eight divisions from real boundary data — keyboard accessible */
+/** Division as an extruded slab: stacked side layers + a top face that rises when selected */
+function Slab({ r, dv, on, hover, i, inView, label, onSelect, onHover, onKey }) {
+  const { t } = useLang();
+  const h = on ? LIFT : hover ? 10 : 0;
+  const layers = on ? 26 : 5;
+  const [lx, ly] = label;
+  return (
+    <g
+      className={`reg ${on ? 'active' : ''}`}
+      tabIndex={0} role="button" aria-pressed={on} aria-label={t(r.name)}
+      onClick={() => onSelect(r.id)} onKeyDown={(e) => onKey(e, r.id)}
+      onMouseEnter={() => onHover(r.id)} onMouseLeave={() => onHover(null)}
+    >
+      <motion.g initial={{ opacity: 0, y: 30 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ delay: 0.15 + i * 0.08, duration: 0.8, ease: [0.22, 0.8, 0.2, 1] }}>
+        {/* ground shadow, grows as the slab rises */}
+        <path d={dv.d} fill="#0B2A2B" filter="url(#map-blur)" className="pointer-events-none" style={{ ...ty(on ? 12 : 0), opacity: on ? 0.35 : 0 }} />
+        {/* side wall: layers spread between the ground and the top face */}
+        {Array.from({ length: layers }, (_, k) => (
+          <path key={k} d={dv.d} fill={on ? (k > layers / 2 ? '#0A4647' : '#062E2F') : SIDE[r.id]} style={ty(BASE - ((h + BASE) * k) / layers)} />
+        ))}
+        {/* top face */}
+        <path d={dv.d} className="top" fill={on ? 'url(#map-top)' : TINT[r.id]} style={ty(-h)} />
+        <text x={lx} y={ly + 5} style={ty(-h)}>{t(r.name)}</text>
+      </motion.g>
+    </g>
+  );
+}
+
+/** Map of the eight divisions from real boundary data, drawn as a tilted 3D relief — keyboard accessible */
 export function BdMap({ active, onSelect }) {
-  const { t, u } = useLang();
+  const { u } = useLang();
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, amount: 0.3 });
+  const [hover, setHover] = useState(null);
   const handleKey = (e, id) => {
     if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSelect(id); }
   };
-  const order = [...content.regions].sort((a, b) => (a.id === active) - (b.id === active)); // active drawn last, on top
+  // painter's order: north-to-south so southern slabs overlap correctly, active always last (on top)
+  const order = [...content.regions].sort((a, b) => (a.id === active) - (b.id === active) || DIVISIONS[a.id].cy - DIVISIONS[b.id].cy);
   const act = DIVISIONS[active];
   const [ax, ay] = LABEL[active] || [act.cx, act.cy];
   return (
-    <svg ref={ref} className="bd-map mx-auto w-full max-w-[520px] overflow-visible" viewBox={`0 0 ${MAP_W} ${MAP_H + 30}`} role="group" aria-label={u('mapLabel')}>
-      <defs>
-        <filter id="map-lift" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="10" stdDeviation="10" floodColor="#0E5B5C" floodOpacity=".35" /></filter>
-        <pattern id="map-waves" width="40" height="14" patternUnits="userSpaceOnUse"><path d="M0 7 Q10 0 20 7 T40 7" fill="none" stroke="#B9D6E0" strokeWidth="1.2" /></pattern>
-      </defs>
-      {/* Bay of Bengal */}
-      <rect x="0" y={MAP_H - 150} width={MAP_W} height="180" fill="url(#map-waves)" opacity=".55" style={{ maskImage: 'linear-gradient(transparent, #000)' }} />
-      <text x={MAP_W / 2 - 20} y={MAP_H + 18} textAnchor="middle" className="fill-[#5E8FA3]" style={{ fontFamily: 'var(--f-serif)', fontStyle: 'italic', fontSize: 20 }}>{u('bay')}</text>
+    <div ref={ref} className="mx-auto w-full max-w-[540px] [perspective:1600px]">
+      <svg className="bd-map w-full overflow-visible [transform:rotateX(30deg)] [transform-origin:50%_70%]" viewBox={`0 -40 ${MAP_W} ${MAP_H + 70}`} role="group" aria-label={u('mapLabel')}>
+        <defs>
+          <filter id="map-blur" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="9" /></filter>
+          <linearGradient id="map-top" x1="0" y1="0" x2="0.4" y2="1">
+            <stop offset="0" stopColor="#1C7A7B" /><stop offset="1" stopColor="#0E5B5C" />
+          </linearGradient>
+        </defs>
+        {/* Bay of Bengal */}
+        <text x="330" y={MAP_H - 40} textAnchor="middle" className="fill-[#5E8FA3]" style={{ fontFamily: 'var(--f-serif)', fontStyle: 'italic', fontSize: 20 }}>{u('bay')}</text>
 
-      {order.map((r, i) => {
-        const dv = DIVISIONS[r.id];
-        const on = r.id === active;
-        const [lx, ly] = LABEL[r.id] || [dv.cx, dv.cy];
-        return (
-          <g
-            key={r.id}
-            className={`reg ${on ? 'active' : ''}`}
-            tabIndex={0}
-            role="button"
-            aria-pressed={on}
-            aria-label={t(r.name)}
-            onClick={() => onSelect(r.id)}
-            onKeyDown={(e) => handleKey(e, r.id)}
-            style={{ '--tint': TINT[r.id] }}
-          >
-            <motion.path
-              d={dv.d}
-              initial={{ pathLength: 0, fillOpacity: 0 }}
-              animate={inView ? { pathLength: 1, fillOpacity: 1 } : {}}
-              transition={{ pathLength: { duration: 1.4, delay: i * 0.08, ease: [0.65, 0, 0.35, 1] }, fillOpacity: { duration: 0.8, delay: 0.9 + i * 0.08 } }}
-              filter={on ? 'url(#map-lift)' : undefined}
-            />
-            <motion.text x={lx} y={ly + 5} initial={{ opacity: 0 }} animate={inView ? { opacity: 1 } : {}} transition={{ delay: 1.3 + i * 0.05 }}>{t(r.name)}</motion.text>
-          </g>
-        );
-      })}
+        {order.map((r) => (
+          <Slab
+            key={r.id} r={r} dv={DIVISIONS[r.id]} on={r.id === active} hover={hover === r.id && r.id !== active}
+            i={content.regions.indexOf(r)} inView={inView} label={LABEL[r.id] || [DIVISIONS[r.id].cx, DIVISIONS[r.id].cy]}
+            onSelect={onSelect} onHover={setHover} onKey={handleKey}
+          />
+        ))}
 
-      {/* pulsing pin on the selected division */}
-      {inView && (
-        <motion.g key={active} initial={{ y: -16, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ type: 'spring', stiffness: 300, damping: 18 }} className="pointer-events-none">
-          <circle cx={ax} cy={ay - 30} r="14" fill="#FBC111" opacity=".35" className="map-ping" />
-          <path d={`M${ax} ${ay - 14} c-9 -10 -14 -16 -14 -23 a14 14 0 1 1 28 0 c0 7 -5 13 -14 23z`} fill="#FBC111" stroke="#fff" strokeWidth="2" />
-          <circle cx={ax} cy={ay - 37} r="5" fill="#fff" />
-        </motion.g>
-      )}
-    </svg>
+        {/* pin standing on the raised division */}
+        {inView && (
+          <motion.g key={active} initial={{ y: -40, opacity: 0 }} animate={{ y: -LIFT, opacity: 1 }} transition={{ type: 'spring', stiffness: 260, damping: 16, delay: 0.15 }} className="pointer-events-none">
+            <circle cx={ax} cy={ay - 30} r="14" fill="#FBC111" opacity=".35" className="map-ping" />
+            <path d={`M${ax} ${ay - 14} c-9 -10 -14 -16 -14 -23 a14 14 0 1 1 28 0 c0 7 -5 13 -14 23z`} fill="#FBC111" stroke="#fff" strokeWidth="2" />
+            <circle cx={ax} cy={ay - 37} r="5" fill="#fff" />
+          </motion.g>
+        )}
+      </svg>
+    </div>
   );
 }
 

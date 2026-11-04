@@ -6,12 +6,12 @@
    ========================================================= */
 const content = {
   heroSlides: [
-    { seed: 'bb-hero-sundarban', place: { en: 'Sundarban, Khulna', bn: 'সুন্দরবন, খুলনা' } },
+    { seed: 'padma_2', place: { en: 'Padma Bridge, Munshiganj', bn: 'পদ্মা সেতু, মুন্সীগঞ্জ' } },
+    { seed: 'bichana', place: { en: 'Bichanakandi, Sylhet', bn: 'বিছানাকান্দি, সিলেট' } },
     { seed: 'bb-hero-tea', place: { en: 'Tea gardens, Sylhet', bn: 'চা বাগান, সিলেট' } },
-    { seed: 'bb-hero-coast', place: { en: "Cox's Bazar, Chattogram", bn: 'কক্সবাজার, চট্টগ্রাম' } },
-    { seed: 'bb-hero-river', place: { en: 'Floating market, Barishal', bn: 'ভাসমান বাজার, বরিশাল' } },
-    { seed: 'bb-hero-ratargul', place: { en: 'Ratargul swamp forest, Sylhet', bn: 'রাতারগুল জলাবন, সিলেট' } },
-    { seed: 'bb-hero-padma', place: { en: 'Padma Bridge, Munshiganj', bn: 'পদ্মা সেতু, মুন্সীগঞ্জ' } }
+    { seed: 'cox_1', place: { en: "Sunset at Cox's Bazar, Chattogram", bn: 'কক্সবাজারের সূর্যাস্ত, চট্টগ্রাম' } },
+    { seed: 'stmartin_0', place: { en: "Saint Martin's Island, Chattogram", bn: 'সেন্ট মার্টিন দ্বীপ, চট্টগ্রাম' } },
+    { seed: 'riversun', place: { en: 'Sunset in Kurigram, Rangpur', bn: 'কুড়িগ্রামের সূর্যাস্ত, রংপুর' } }
   ],
 
   /* value is a number; `fmt` decides decimals. pillar/region allow filtering */

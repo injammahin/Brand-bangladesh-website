@@ -87,12 +87,12 @@ function Hero() {
       <motion.div className="absolute -inset-8 -z-20" style={{ x: px, y: py }} initial={{ scale: 1.15 }} animate={ready ? { scale: 1 } : undefined} transition={{ duration: 2.2, ease: [0.22, 0.8, 0.2, 1] }}>
         <AnimatePresence initial={false}>
           <motion.div key={i} className="absolute inset-0" initial={{ opacity: 0, scale: 1.08, clipPath: 'inset(0 0 0 100%)' }} animate={{ opacity: 1, scale: 1, clipPath: 'inset(0 0 0 0%)' }} exit={{ opacity: 0.6 }} transition={{ duration: 1.5, ease: [0.76, 0, 0.24, 1] }}>
-            <img src={img(slides[i].seed, 1920)} alt="" width="1920" height="1280" fetchpriority={i === 0 ? 'high' : 'auto'} className={cn('h-full w-full object-cover', !paused && 'kenburns')} />
+            <img src={img(slides[i].seed, 1920)} srcSet={slides[i].seed === 'bichana' ? '/photos/bichana-960.jpg 960w, /photos/bichana-1920.jpg 1920w, /photos/bichana-2880.jpg 2880w' : undefined} sizes="100vw" alt="" width="1920" height="1280" fetchpriority={i === 0 ? 'high' : 'auto'} className={cn('h-full w-full object-cover', !paused && 'kenburns')} />
           </motion.div>
         </AnimatePresence>
       </motion.div>
-      <div className="absolute inset-0 -z-10 bg-[linear-gradient(180deg,rgba(0,0,0,.45)_0%,rgba(0,0,0,.05)_38%,rgba(0,0,0,.88)_100%)]" />
-      <div className="absolute inset-y-0 left-0 -z-10 w-2/3 bg-gradient-to-r from-black/55 to-transparent" />
+      <div className="absolute inset-0 -z-10 bg-[linear-gradient(180deg,rgba(0,0,0,.18)_0%,rgba(0,0,0,0)_35%,rgba(0,0,0,.55)_100%)]" />
+      <div className="absolute inset-y-0 left-0 -z-10 w-3/4 bg-[linear-gradient(90deg,rgba(0,0,0,.5)_0%,rgba(0,0,0,.22)_45%,rgba(0,0,0,0)_85%)]" />
 
       {/* slide counter, right edge */}
       <div className="absolute right-6 top-1/2 z-[2] hidden -translate-y-1/2 flex-col items-center gap-3 lg:flex" aria-hidden="true">
@@ -105,14 +105,14 @@ function Hero() {
 
       <motion.div className="container relative z-[2] pb-8 pt-28 lg:pb-12" style={{ y: contentY, opacity: contentO }}>
         <motion.span className="eyebrow text-brand-goldsoft" initial={{ opacity: 0, x: -20 }} animate={ready ? { opacity: 1, x: 0 } : undefined} transition={{ delay: 0.15, duration: 0.8, ease }}>{t(T.eyebrow)}</motion.span>
-        <h1 className="display my-5 max-w-5xl text-[clamp(44px,8.4vw,112px)]">
+        <h1 className="display my-5 max-w-5xl text-[clamp(44px,8.4vw,112px)] [text-shadow:0_4px_30px_rgba(0,0,0,.45)]">
           {lines.map((l, k) => (
             <span key={k} className="line-mask">
               <motion.span className="block" initial={{ y: '110%', rotate: 2 }} animate={ready ? { y: '0%', rotate: 0 } : undefined} transition={{ delay: 0.25 + k * 0.14, duration: 1.1, ease }} dangerouslySetInnerHTML={{ __html: l }} />
             </span>
           ))}
         </h1>
-        <motion.p className="lead mb-8 max-w-2xl text-white/85" initial={{ opacity: 0, y: 20 }} animate={ready ? { opacity: 1, y: 0 } : undefined} transition={{ delay: 0.65, duration: 0.9, ease }}>{t(T.lead)}</motion.p>
+        <motion.p className="lead mb-8 max-w-2xl text-white/90 [text-shadow:0_2px_14px_rgba(0,0,0,.6)]" initial={{ opacity: 0, y: 20 }} animate={ready ? { opacity: 1, y: 0 } : undefined} transition={{ delay: 0.65, duration: 0.9, ease }}>{t(T.lead)}</motion.p>
         <motion.div className="flex flex-wrap gap-3" initial={{ opacity: 0, y: 20 }} animate={ready ? { opacity: 1, y: 0 } : undefined} transition={{ delay: 0.8, duration: 0.9, ease }}>
           <Button asChild variant="light" size="lg" className="btn-shine"><Link to="/story">{t(T.discover)} <i className="fa-solid fa-arrow-right" aria-hidden="true" /></Link></Button>
           <Button asChild variant="outline-light" size="lg"><a href="#pillars">{t(T.explorePillars)}</a></Button>
@@ -204,7 +204,7 @@ function LatestIssue() {
 
 export default function Home() {
   const { t } = useLang();
-  const [region, setRegion] = useState('chattogram');
+  const [region, setRegion] = useState('dhaka');
   useDocumentTitle(t(T.title));
 
   return (

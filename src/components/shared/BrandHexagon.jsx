@@ -54,9 +54,9 @@ export function BrandHexagon() {
           <p className="max-w-xl text-brand-muted">{t(T.sub)}</p>
         </motion.div>
 
-        <div className="grid items-center gap-12 lg:grid-cols-[1fr_1fr] lg:gap-20">
+        <div className="grid items-center gap-12 lg:grid-cols-[1.05fr_.95fr] lg:gap-16">
           {/* hexagon */}
-          <div className="relative mx-auto w-full max-w-[540px]">
+          <div className="relative mx-auto w-full max-w-[640px]">
             <motion.svg viewBox="-12 -12 424 424" className="w-full overflow-visible drop-shadow-[0_30px_40px_rgba(21,32,31,.18)]" role="group" aria-label={t(T.ey)}>
               <defs>
                 {pillars.map((pl, k) => (
@@ -102,18 +102,17 @@ export function BrandHexagon() {
 
               {/* centre medallion with the brand mark */}
               <motion.g initial={{ scale: 0 }} animate={inView ? { scale: 1 } : {}} transition={{ delay: 0.9, type: 'spring', stiffness: 200, damping: 16 }} className="pointer-events-none">
-                <circle cx={C} cy={C} r="66" fill="#FBF8F2" opacity=".55" className="animate-pulse" />
                 <circle cx={C} cy={C} r="54" fill="#FFFFFF" stroke="#E8E1D4" strokeWidth="1.5" />
                 <g transform={`translate(${C - 35} ${C - 37}) scale(.58)`}><Monument animated={inView} width="120" height="120" /></g>
               </motion.g>
             </motion.svg>
             {/* labels as HTML so long Bangla names never clip */}
             {pillars.map((pl, k) => {
-              const [lx, ly] = mid(k, 0.64);
+              const [lx, ly] = mid(k, k === 2 || k === 4 ? 0.6 : 0.64);
               return (
                 <motion.div
                   key={pl.id}
-                  className={cn('pointer-events-none absolute flex w-[26%] -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-1 text-center leading-tight text-white transition-transform duration-500 [text-shadow:0_2px_10px_rgba(0,0,0,.55)]', k === active && 'scale-[1.12]')}
+                  className={cn('pointer-events-none absolute flex w-[20%] -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-1 text-center leading-tight text-white transition-transform duration-500 [text-shadow:0_2px_10px_rgba(0,0,0,.55)]', k === active && 'scale-[1.12]')}
                   style={{ left: `${((lx + 12) / 424) * 100}%`, top: `${((ly + 12) / 424) * 100}%` }}
                   initial={{ opacity: 0 }} animate={inView ? { opacity: 1 } : {}} transition={{ delay: 0.5 + k * 0.09 }}
                   aria-hidden="true"
