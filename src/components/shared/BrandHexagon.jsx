@@ -31,6 +31,22 @@ export function BrandHexagon() {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, amount: 0.35 });
   const [active, setActive] = useState(0);
+  const hexRef = useRef(null);
+  const [panelBox, setPanelBox] = useState(undefined);
+  useEffect(() => {
+    const el = hexRef.current; if (!el) return;
+    const ro = new ResizeObserver(() => {
+      if (window.innerWidth < 1024) { setPanelBox(undefined); return; }
+      // match the drawn hexagon outline exactly (it sits inside padding in the SVG)
+      const frame = el.querySelector('polygon[stroke^="url"]');
+      if (!frame) return;
+      const f = frame.getBoundingClientRect(), box = el.getBoundingClientRect();
+      setPanelBox({ height: f.height, marginTop: f.top - box.top });
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
   const [hold, setHold] = useState(false);
   const p = pillars[active];
 
@@ -54,9 +70,9 @@ export function BrandHexagon() {
           <p className="max-w-xl text-brand-muted">{t(T.sub)}</p>
         </motion.div>
 
-        <div className="grid items-center gap-12 lg:grid-cols-[1.05fr_.95fr] lg:gap-16">
+        <div className="grid items-start gap-12 lg:grid-cols-[1.05fr_.95fr] lg:gap-16">
           {/* hexagon */}
-          <div className="relative mx-auto w-full max-w-[640px]">
+          <div ref={hexRef} className="relative mx-auto w-full max-w-[640px]">
             <motion.svg viewBox="-12 -12 424 424" className="w-full overflow-visible drop-shadow-[0_30px_40px_rgba(21,32,31,.18)]" role="group" aria-label={t(T.ey)}>
               <defs>
                 {pillars.map((pl, k) => (
@@ -84,7 +100,7 @@ export function BrandHexagon() {
                     <g clipPath={`url(#hex-seg-${k})`}>
                       {/* the pillar's photo, slowly zooming when active */}
                       <image
-                        href={img(pl.seed, 960)} x="0" y="0" width="400" height="400" preserveAspectRatio="xMidYMid slice"
+                        href={inView ? img(pl.seed, 960) : undefined} x="0" y="0" width="400" height="400" preserveAspectRatio="xMidYMid slice"
                         className="transition-transform duration-[1.4s] ease-brand [transform-box:fill-box] [transform-origin:center]"
                         style={{ transform: on ? 'scale(1.12)' : 'scale(1)' }}
                       />
@@ -125,10 +141,10 @@ export function BrandHexagon() {
           </div>
 
           {/* active pillar panel */}
-          <div className="relative min-h-[520px] overflow-hidden rounded-[5px] text-white shadow-[0_40px_80px_-40px_rgba(0,0,0,.5)]" aria-live="polite">
+          <div className="relative min-h-[420px] overflow-hidden rounded-[5px] text-white shadow-[0_40px_80px_-40px_rgba(0,0,0,.5)] lg:min-h-0" style={panelBox} aria-live="polite">
             <AnimatePresence mode="popLayout">
               <motion.img
-                key={p.id} src={img(p.seed, 1920)} alt=""
+                key={p.id} src={img(p.seed, 1920)} alt="" loading="lazy" decoding="async"
                 className="absolute inset-0 h-full w-full object-cover"
                 initial={{ opacity: 0, scale: 1.15, clipPath: 'inset(0 0 100% 0)' }} animate={{ opacity: 1, scale: 1, clipPath: 'inset(0 0 0% 0)' }} exit={{ opacity: 0 }}
                 transition={{ duration: 1.1, ease: [0.76, 0, 0.24, 1] }}

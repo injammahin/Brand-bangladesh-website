@@ -18,8 +18,8 @@ function photoKey(seed) {
   return KEYS[hash(seed) % KEYS.length];
 }
 
-/** Real Bangladesh photo for a seed, self-hosted in /public/photos at 960 and 1920px — replace with CMS/CDN images in production */
-export const img = (seed, w = 1200) => `/photos/${photoKey(seed)}-${w > 900 ? 1920 : 960}.jpg`;
+/** Real Bangladesh photo for a seed, self-hosted in /public/photos as WebP at 960 and 1920px — replace with CMS/CDN images in production */
+export const img = (seed, w = 1200) => `/photos/${photoKey(seed)}-${w > 1000 ? 1920 : 960}.webp`;
 
 /** Commons page for a seed's photo (credits) */
 export const imgCredit = (seed) => `https://commons.wikimedia.org/wiki/File:${encodeURIComponent(PHOTOS[photoKey(seed)][0].split('/').pop())}`;

@@ -7,7 +7,7 @@
 const content = {
   heroSlides: [
     { seed: 'padma_2', place: { en: 'Padma Bridge, Munshiganj', bn: 'পদ্মা সেতু, মুন্সীগঞ্জ' } },
-    { seed: 'bichana', place: { en: 'Bichanakandi, Sylhet', bn: 'বিছানাকান্দি, সিলেট' } },
+    { seed: 'bichana', pos: 'center 88%', place: { en: 'Bichanakandi, Sylhet', bn: 'বিছানাকান্দি, সিলেট' } },
     { seed: 'bb-hero-tea', place: { en: 'Tea gardens, Sylhet', bn: 'চা বাগান, সিলেট' } },
     { seed: 'cox_1', place: { en: "Sunset at Cox's Bazar, Chattogram", bn: 'কক্সবাজারের সূর্যাস্ত, চট্টগ্রাম' } },
     { seed: 'stmartin_0', place: { en: "Saint Martin's Island, Chattogram", bn: 'সেন্ট মার্টিন দ্বীপ, চট্টগ্রাম' } },
@@ -118,7 +118,7 @@ const content = {
     { y: 1974, t: { en: 'United Nations', bn: 'জাতিসংঘ' }, d: { en: 'Bangladesh joins the community of nations.', bn: 'জাতিসংঘের সদস্যপদ লাভ করে বাংলাদেশ।' } },
     { y: 1997, t: { en: 'Sundarban on the world stage', bn: 'বিশ্বমঞ্চে সুন্দরবন' }, d: { en: 'The mangrove forest is inscribed as a UNESCO World Heritage Site.', bn: 'ইউনেস্কো বিশ্ব ঐতিহ্যের তালিকায় যুক্ত হয় সুন্দরবন।' } },
     { y: 1999, t: { en: 'Mother Language Day', bn: 'মাতৃভাষা দিবস' }, d: { en: '21 February becomes International Mother Language Day.', bn: '২১ ফেব্রুয়ারি পায় আন্তর্জাতিক মাতৃভাষা দিবসের স্বীকৃতি।' } },
-    { y: 2026, t: { en: 'The next chapter', bn: 'পরের অধ্যায়' }, d: { en: 'A young nation writes its story for the world.', bn: 'তরুণ এক জাতি বিশ্বকে শোনাচ্ছে নিজের গল্প।' } }
+    { y: 2024, t: { en: 'July Uprising', bn: 'জুলাই গণ-অভ্যুত্থান' }, d: { en: 'Students lead a nationwide movement for justice and a fairer Bangladesh.', bn: 'শিক্ষার্থীদের নেতৃত্বে দেশজুড়ে ছাত্র-জনতার আন্দোলন—ন্যায় আর বৈষম্যহীন বাংলাদেশের স্বপ্নে।' } }
   ],
 
   wall: [

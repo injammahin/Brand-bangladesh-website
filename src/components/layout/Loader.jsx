@@ -24,10 +24,19 @@ export function Loader() {
   useEffect(() => {
     document.body.style.overflow = 'hidden';
     const minT = new Promise((r) => setTimeout(r, 2000));
-    const loadP = new Promise((r) => (document.readyState === 'complete' ? r() : window.addEventListener('load', r, { once: true })));
-    const maxT = new Promise((r) => setTimeout(r, 4500));
+    // never lift the curtain onto a blank hero: wait for the first big photo on the page
+    const heroP = new Promise((r) => {
+      const check = () => {
+        const im = document.querySelector('main section img');
+        if (im && im.complete && im.naturalWidth) r();
+        else if (im) { im.addEventListener('load', r, { once: true }); im.addEventListener('error', r, { once: true }); }
+        else setTimeout(check, 100);
+      };
+      check();
+    });
+    const maxT = new Promise((r) => setTimeout(r, 7000));
     let id;
-    Promise.race([Promise.all([minT, loadP]), maxT]).then(() => {
+    Promise.race([Promise.all([minT, heroP]), maxT]).then(() => {
       setShow(false);
       document.body.style.overflow = '';
       // let the hero start while the curtain is halfway up

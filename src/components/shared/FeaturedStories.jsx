@@ -68,7 +68,7 @@ export function FeaturedStories({ stories }) {
         <Link to={`/article/${s.id}`} className="group relative isolate block h-full min-h-[660px] overflow-hidden rounded-[5px] text-white shadow-[0_50px_80px_-50px_rgba(21,32,31,.6)]" aria-label={t(s.title)}>
           <AnimatePresence initial={false}>
             <motion.div key={s.id} className="absolute inset-0 -z-20" initial={{ clipPath: 'inset(0 0 0 100%)' }} animate={{ clipPath: 'inset(0 0 0 0%)' }} exit={{ opacity: 0.85 }} transition={{ duration: 1.2, ease: [0.76, 0, 0.24, 1] }}>
-              <motion.img src={img(s.seed, 1920)} alt="" className="h-full w-full object-cover" initial={{ scale: 1.15 }} animate={{ scale: 1.02 }} transition={{ duration: DWELL / 1000 + 1.5, ease: 'linear' }} />
+              <motion.img src={img(s.seed, 1920)} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover" initial={{ scale: 1.15 }} animate={{ scale: 1.02 }} transition={{ duration: DWELL / 1000 + 1.5, ease: 'linear' }} />
             </motion.div>
           </AnimatePresence>
           <div className="absolute inset-0 -z-10 bg-gradient-to-t from-black/90 via-black/25 to-black/30" />

@@ -54,9 +54,9 @@ export function SixSeasons() {
   }, [i, inView, paused, reduce]);
 
   return (
-    <section ref={ref} className="relative isolate overflow-hidden bg-[#FBF8F2] py-20 lg:py-28" aria-labelledby="seasons-h">
+    <section ref={ref} className="relative isolate overflow-hidden bg-[#FBF8F2] py-16 lg:py-20" aria-labelledby="seasons-h">
       <div className="container">
-        <motion.div className="mb-14 grid gap-6 border-b border-brand-line pb-8 lg:grid-cols-[1fr_1fr] lg:items-end" initial={{ opacity: 0, y: 30 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.9, ease }}>
+        <motion.div className="mb-10 grid gap-6 border-b border-brand-line pb-6 lg:grid-cols-[1fr_1fr] lg:items-end" initial={{ opacity: 0, y: 30 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.9, ease }}>
           <div className="flex flex-col gap-3">
             <span className="eyebrow">{t(T.ey)}</span>
             <h2 id="seasons-h" className="display-md" dangerouslySetInnerHTML={{ __html: t(T.h) }} />
@@ -64,9 +64,9 @@ export function SixSeasons() {
           <p className="max-w-xl text-brand-muted lg:justify-self-end">{t(T.sub)}</p>
         </motion.div>
 
-        <div className="grid items-center gap-12 lg:grid-cols-[1fr_1.1fr] lg:gap-14" onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)}>
+        <div className="grid items-start gap-10 lg:grid-cols-[1fr_1.15fr] lg:gap-12" onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)}>
           {/* the brand mark, each shard filled with its season */}
-          <div className="relative mx-auto w-full max-w-[640px]">
+          <div className="relative mx-auto w-full max-w-[min(540px,calc(100svh-300px))] min-w-[260px]">
             <svg viewBox="0 0 120 120" className="w-full overflow-visible" role="group" aria-label={t(T.ey)}>
               <defs>
                 {SEASONS.map((x) => <clipPath key={x.id} id={`ss-${x.id}`}>{x.pts.map((p) => <polygon key={p} points={p} />)}</clipPath>)}
@@ -85,7 +85,7 @@ export function SixSeasons() {
                     transition={{ delay: 0.15 + k * 0.1, duration: 1, ease: [0.65, 0, 0.35, 1] }}
                   >
                     <g clipPath={`url(#ss-${x.id})`}>
-                      <image href={img(x.photo, 960)} x="0" y="0" width="120" height="120" preserveAspectRatio="xMidYMid slice" />
+                      <image href={inView ? img(x.photo, 960) : undefined} x="0" y="0" width="120" height="120" preserveAspectRatio="xMidYMid slice" />
                       <rect x="0" y="0" width="120" height="120" fill={x.c} style={{ opacity: on ? 0.08 : 0.68, mixBlendMode: 'multiply', transition: 'opacity .7s' }} />
                       <rect x="0" y="0" width="120" height="120" fill={x.c} style={{ opacity: on ? 0 : 0.3, transition: 'opacity .7s' }} />
                     </g>
@@ -98,7 +98,7 @@ export function SixSeasons() {
                 <clipPath id="ss-bd"><polygon points={MARK.teal} /></clipPath>
                 <g clipPath="url(#ss-bd)">
                   <rect x="0" y="0" width="120" height="120" fill="#0E5B5C" />
-                  <image href={img('smriti_1', 960)} x="44" y="0" width="54" height="120" preserveAspectRatio="xMidYMid slice" />
+                  <image href={inView ? img('smriti_1', 960) : undefined} x="44" y="0" width="54" height="120" preserveAspectRatio="xMidYMid slice" />
                   <rect x="0" y="0" width="120" height="120" fill="#0E5B5C" opacity=".55" />
                 </g>
                 <text
@@ -108,7 +108,7 @@ export function SixSeasons() {
               </motion.g>
             </svg>
             {/* active season name tag under the mark */}
-            <div className="mt-6 flex items-center justify-center gap-3 text-sm">
+            <div className="mt-4 flex items-center justify-center gap-3 text-sm">
               <span className="h-2.5 w-2.5 rounded-full transition-colors duration-500" style={{ background: s.c }} />
               <span className="font-semibold text-brand-ink">{t(s.name)}</span>
               <span className="text-brand-muted">· {t(s.alt)}</span>
@@ -117,10 +117,10 @@ export function SixSeasons() {
 
           {/* active season */}
           <div className="flex flex-col">
-            <div className="relative aspect-[16/9] overflow-hidden rounded-[5px] shadow-[0_40px_70px_-45px_rgba(21,32,31,.6)]">
+            <div className="relative aspect-[16/9] max-h-[calc(100svh-360px)] min-h-[220px] w-full overflow-hidden rounded-[5px] shadow-[0_40px_70px_-45px_rgba(21,32,31,.6)]">
               <AnimatePresence initial={false}>
                 <motion.img
-                  key={s.id} src={img(s.photo, 1920)} alt={`${t(s.name)} — ${t(s.alt)}`}
+                  key={s.id} src={img(s.photo, 1920)} loading="lazy" decoding="async" alt={`${t(s.name)} — ${t(s.alt)}`}
                   className="absolute inset-0 h-full w-full object-cover"
                   initial={{ clipPath: 'inset(0 0 0 100%)', scale: 1.1 }} animate={{ clipPath: 'inset(0 0 0 0%)', scale: 1 }} exit={{ opacity: 0.85 }}
                   transition={{ duration: 1.1, ease: [0.76, 0, 0.24, 1] }}
@@ -129,8 +129,10 @@ export function SixSeasons() {
               <span className="absolute left-5 top-5 rounded-full bg-white/90 px-3 py-1 font-mag text-sm text-brand-ink backdrop-blur">{t(T.season)} {num(pad(i + 1))} <span className="text-brand-muted">{t(T.of)} {num(pad(SEASONS.length))}</span></span>
             </div>
 
+            {/* fixed height so the section never resizes while seasons change */}
+            <div className="relative h-[300px] sm:h-[190px]">
             <AnimatePresence mode="wait">
-              <motion.div key={s.id} className="grid gap-6 pt-8 sm:grid-cols-[1fr_1.3fr] sm:gap-10" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.5, ease }}>
+              <motion.div key={s.id} className="absolute inset-x-0 top-0 grid gap-6 pt-8 sm:grid-cols-[1fr_1.3fr] sm:gap-10" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.5, ease }}>
                 <div>
                   <h3 className="font-mag text-[clamp(38px,4vw,58px)] font-medium leading-none [html[lang=bn]_&]:font-normal [html[lang=bn]_&]:leading-tight">{t(s.name)}</h3>
                   <p className="mt-2 font-serif text-lg italic text-brand-gold [html[lang=bn]_&]:not-italic">{lang === 'bn' ? s.alt.bn : `${s.name.bn} · ${s.alt.en}`}</p>
@@ -142,6 +144,7 @@ export function SixSeasons() {
                 </div>
               </motion.div>
             </AnimatePresence>
+            </div>
 
           </div>
         </div>

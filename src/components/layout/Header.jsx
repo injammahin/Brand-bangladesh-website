@@ -41,7 +41,8 @@ export function Header({ onSearch }) {
       >
         <div className="stripe-run h-[3px]" aria-hidden="true" />
         <div className="container flex h-[var(--header-h)] items-center justify-between gap-4">
-          <Link to="/" aria-label={`Brand Bangladesh — ${u('home')}`} className="group relative shrink-0">
+          {/* full reload of the home page (replays the intro), even when already on it */}
+          <Link to="/" reloadDocument aria-label={`Brand Bangladesh — ${u('home')}`} className="group relative shrink-0">
             <img src="/logo-light.png" alt="Brand Bangladesh" width="918" height="285" className={cn('w-auto transition-all duration-500 ease-brand group-hover:scale-[1.03]', scrolled ? 'h-9 xl:h-[40px]' : 'h-10 xl:h-[50px]')} />
           </Link>
 

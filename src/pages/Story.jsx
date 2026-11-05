@@ -108,7 +108,7 @@ const VALUES = [
   { c: '#0E5B5C', icon: 'fa-hand-holding-heart', h: { en: 'Warmth', bn: 'আন্তরিকতা' }, p: { en: 'A hospitality that makes every guest family.', bn: 'অতিথিকে আপন করে নেওয়ার চিরায়ত আতিথেয়তা।' } },
   { c: '#EE1B5B', icon: 'fa-circle-check', h: { en: 'Credibility', bn: 'বিশ্বাসযোগ্যতা' }, p: { en: 'Saying what we can prove.', bn: 'যা বলি, তা প্রমাণসহ বলি।' } },
 ];
-const TL_IMG = ['shaheed_1', 'smriti_1', 'sangsad_0', 'sunddeer_0', 'student_3', 'metro_3'];
+const TL_IMG = ['shaheed_1', 'smriti_1', 'sangsad_0', 'sunddeer_0', 'student_3', 'july_0'];
 const ease = [0.22, 0.8, 0.2, 1];
 
 function Hero() {
@@ -118,7 +118,7 @@ function Hero() {
   const y = useTransform(scrollYProgress, [0, 1], ['0%', '18%']);
   return (
     <section ref={ref} className="grain on-dark relative isolate flex min-h-[calc(100svh-var(--header-h)-3px)] flex-col justify-start overflow-hidden bg-black text-white">
-      <motion.img src={img('bb-story-delta', 1920)} srcSet="/photos/riversun-960.jpg 960w, /photos/riversun-1920.jpg 1920w, /photos/riversun-2880.jpg 2880w" sizes="100vw" fetchpriority="high" alt="" className="absolute inset-0 -z-20 h-full w-full object-cover object-[center_72%]" style={{ y, scale: 1.04 }} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1.4 }} />
+      <motion.img src={img('bb-story-delta', 1920)} srcSet="/photos/riversun-960.webp 960w, /photos/riversun-1920.webp 1920w, /photos/riversun-2880.webp 2880w" sizes="100vw" fetchpriority="high" alt="" className="absolute inset-0 -z-20 h-full w-full object-cover object-[center_72%]" style={{ y, scale: 1.04 }} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1.4 }} />
       <div className="absolute inset-0 -z-10 bg-[linear-gradient(180deg,rgba(0,0,0,.55)_0%,rgba(0,0,0,.2)_38%,rgba(0,0,0,0)_60%,rgba(0,0,0,.25)_100%)]" />
       <div className="container relative z-[2] pb-16 pt-[9vh]">
         <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.9, ease }} className="flex max-w-5xl flex-col gap-4">

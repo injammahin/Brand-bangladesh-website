@@ -99,7 +99,7 @@ export function RegionPanel({ id }) {
     <div className="relative overflow-hidden rounded-[5px] border border-brand-line bg-white shadow-brand" aria-live="polite">
       <div className="relative aspect-[16/9] overflow-hidden bg-brand-paper">
         <AnimatePresence mode="popLayout">
-          <motion.img key={id} src={img(`bb-r-${id}`, 960)} alt={t(r.name)} className="absolute inset-0 h-full w-full object-cover" initial={{ opacity: 0, scale: 1.12 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.9, ease: [0.22, 0.8, 0.2, 1] }} />
+          <motion.img key={id} loading="lazy" decoding="async" src={img(`bb-r-${id}`, 960)} alt={t(r.name)} className="absolute inset-0 h-full w-full object-cover" initial={{ opacity: 0, scale: 1.12 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.9, ease: [0.22, 0.8, 0.2, 1] }} />
         </AnimatePresence>
         <span className="stripe absolute inset-x-0 bottom-0 h-[4px]" />
       </div>

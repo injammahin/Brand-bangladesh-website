@@ -4,12 +4,13 @@
  * Before launch, swap for approved photography served from the project CDN.
  */
 export const PHOTOS = {
+  july_0: ["e/ee/Graffiti_in_Rajshahi_Bangladesh_after_2024_Bangladesh_quota_reform_movement_05.jpg", 6000, 4000],
   sea_grishma: ["client-supplied/sea_grishma.jpg", 1200, 675], // supplied by the client
-  sea_shorot: ["client-supplied/sea_shorot.jpg", 800, 472], // supplied by the client
-  sea_bosonto: ["client-supplied/sea_bosonto.jpg", 552, 362], // supplied by the client
-  sea_sheet: ["client-supplied/sea_sheet.jpg", 547, 365], // supplied by the client
-  sea_hemonto: ["client-supplied/sea_hemonto.jpg", 900, 519], // supplied by the client
-  sea_borsha: ["client-supplied/sea_borsha.jpg", 678, 452], // supplied by the client
+  sea_shorot: ["c/cd/Beautiful_photo_of_kashful_(catkin)_and_sun_as_background.jpg", 4032, 3024],
+  sea_bosonto: ["1/19/Parrots_in_the_Crimson_Palash.jpg", 5858, 3517],
+  sea_sheet: ["8/8e/Sunset_over_mustard_field.jpg", 4608, 3456],
+  sea_hemonto: ["c/c8/Paddy_Harvest_02.jpg", 6000, 4000],
+  sea_borsha: ["c/cc/A_wonderful_childhood_during_the_rainy_season.jpg", 6000, 4000],
   lalbagh_pb: ["1/17/Back_view_of_tomb_of_paribibi.jpg", 4983, 3531],
   bichana: ["b/b6/Bichnakandi,_Sylhet.jpg", 6000, 4000],
   riversun: ["1/1d/River_sunset_in_Bangladesh.jpg", 4608, 3456],
