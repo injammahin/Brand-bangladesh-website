@@ -4,6 +4,12 @@
  * Before launch, swap for approved photography served from the project CDN.
  */
 export const PHOTOS = {
+  story_map: ["v2-site/map.jpg", 2000, 1118], // illustration from the v2 site
+  story_barishal: ["v2-site/Barishal.jpg", 1760, 2430], // illustration from the v2 site
+  story_dhaka: ["v2-site/Dhaka.jpg", 1792, 2400], // illustration from the v2 site
+  story_khulna: ["v2-site/Khulna.jpg", 1792, 2400], // illustration from the v2 site
+  story_chittagong: ["v2-site/Chittagong.jpg", 1792, 2400], // illustration from the v2 site
+  story_sylhet: ["v2-site/sylhet.jpg", 1792, 2400], // illustration from the v2 site
   july_0: ["e/ee/Graffiti_in_Rajshahi_Bangladesh_after_2024_Bangladesh_quota_reform_movement_05.jpg", 6000, 4000],
   sea_grishma: ["client-supplied/sea_grishma.jpg", 1200, 675], // supplied by the client
   sea_shorot: ["c/cd/Beautiful_photo_of_kashful_(catkin)_and_sun_as_background.jpg", 4032, 3024],

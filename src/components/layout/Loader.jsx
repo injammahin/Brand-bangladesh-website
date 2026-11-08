@@ -27,6 +27,8 @@ export function Loader() {
     // never lift the curtain onto a blank hero: wait for the first big photo on the page
     const heroP = new Promise((r) => {
       const check = () => {
+        const vid = document.querySelector('main section video');
+        if (vid) { if (vid.readyState >= 3) r(); else { vid.addEventListener('canplay', r, { once: true }); vid.addEventListener('error', r, { once: true }); } return; }
         const im = document.querySelector('main section img');
         if (im && im.complete && im.naturalWidth) r();
         else if (im) { im.addEventListener('load', r, { once: true }); im.addEventListener('error', r, { once: true }); }

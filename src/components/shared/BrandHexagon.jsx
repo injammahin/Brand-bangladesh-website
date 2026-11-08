@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { AnimatePresence, motion, useInView, useReducedMotion } from 'framer-motion';
+import { AnimatePresence, animate, motion, useInView, useMotionValue, useReducedMotion, useTransform } from 'framer-motion';
 import content from '@/data/content';
 import { useLang } from '@/context/LanguageContext';
 import { cn, img } from '@/lib/utils';
@@ -23,6 +23,14 @@ const mid = (k, f) => {
   const a = ((-90 + 60 * k) * Math.PI) / 180;
   return [C + f * R * Math.cos(a), C + f * R * Math.sin(a)];
 };
+
+// space kept above and below the cloth for the wave; the cloth itself matches the hexagon's height
+const FLAG_PAD = 0.045;
+// moment (s) the sweeping flag fully covers the card, when the photo and text swap
+const FLAG_SWAP = 0.8;
+
+/** Cloth wave offset at x (0..1): pinned at the pole, growing towards the fly */
+const waveAt = (x, ph, a) => a * Math.sin(Math.min(1, x / 0.3) * Math.PI / 2) * Math.sin(Math.PI * 2 * 1.1 * x + ph);
 
 export function BrandHexagon() {
   const { t } = useLang();
@@ -56,6 +64,53 @@ export function BrandHexagon() {
     const id = setTimeout(() => setActive((a) => (a + 1) % pillars.length), 3800);
     return () => clearTimeout(id);
   }, [active, hold, inView, reduce, pillars.length]);
+
+  // flag shape (pinned at the left like a flag on its pole): one long, smooth wave with parallel top and bottom edges and a straight hoist,
+  // like a waving national flag. Units are 0..1 of the card; phase and amplitude drive the waving.
+  // rests high near the left, dips lowest around two-thirds across, then lifts again at the fly end
+  const REST = -2.953;
+  const phase = useMotionValue(REST);
+  const amp = useMotionValue(0.028);
+  const flagD = useTransform([phase, amp], ([ph, a]) => {
+    // every slice of the cloth is the same height; the band is padded by FLAG_PAD so the wave never clips
+    const N = 40, top = [], bot = [];
+    const at = (x) => waveAt(x, ph, a);
+    for (let k = 0; k <= N; k++) {
+      const x = k / N, w = at(x);
+      top.push([x, FLAG_PAD + w]);
+      bot.push([x, 1 - FLAG_PAD + w]);
+    }
+    const f = (p) => `${p[0].toFixed(4)},${p[1].toFixed(4)}`;
+    return `M${top.map(f).join(' L')} L${bot.reverse().map(f).join(' L')} Z`;
+  });
+  useEffect(() => {
+    if (reduce) return;
+    // one full wave rolls from the hoist (left) to the fly (right), then settles back to the resting shape
+    animate(phase, [REST, REST - Math.PI * 2], { duration: 2.8, ease: [0.37, 0, 0.2, 1] });
+    animate(amp, [0.028, 0.045, 0.028], { duration: 2.8, ease: 'easeInOut' });
+  }, [active, reduce, phase, amp]);
+
+  // the flag's red disc, bent gently by the same wave so it ripples with the fabric
+  const [flagAspect, setFlagAspect] = useState(1.6);
+  const flagRef = useRef(null);
+  useEffect(() => {
+    const el = flagRef.current; if (!el) return;
+    const ro = new ResizeObserver(([e]) => e.contentRect.height && setFlagAspect(e.contentRect.width / e.contentRect.height));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+  const discD = useTransform([phase, amp], ([ph, a]) => {
+    const ry = 0.33, rx = ry / flagAspect, cx = 0.45, cy = 0.5, N = 64, pts = [];
+    for (let k = 0; k <= N; k++) {
+      const t = (k / N) * Math.PI * 2;
+      const x = cx + rx * Math.cos(t);
+      // vertical bend follows the cloth; a slight horizontal squeeze where the fabric folds away
+      const bend = 1.0 * waveAt(x, ph, a) * (1 + 0.3 * Math.sin(t));
+      const sq = 1 - 0.4 * Math.abs(waveAt(x, ph + 1.2, a));
+      pts.push(`${(cx + (x - cx) * sq).toFixed(4)},${(cy + ry * Math.sin(t) + bend).toFixed(4)}`);
+    }
+    return `M${pts.join(' L')} Z`;
+  });
 
   const pick = (k) => { setActive(k); setHold(true); };
 
@@ -141,19 +196,50 @@ export function BrandHexagon() {
           </div>
 
           {/* active pillar panel */}
-          <div className="relative min-h-[420px] overflow-hidden rounded-[5px] text-white shadow-[0_40px_80px_-40px_rgba(0,0,0,.5)] lg:min-h-0" style={panelBox} aria-live="polite">
-            <AnimatePresence mode="popLayout">
+          {/* waving-flag card: outer layer carries the shadow, inner layer is clipped to the flag shape */}
+          <div className="relative min-h-[420px] lg:min-h-0" style={{ ...(panelBox && { height: panelBox.height / (1 - 2 * FLAG_PAD), marginTop: panelBox.marginTop - (panelBox.height * FLAG_PAD) / (1 - 2 * FLAG_PAD) }), filter: 'drop-shadow(0 30px 40px rgba(0,0,0,.28)) drop-shadow(6px 8px 0 rgba(0,0,0,.12))' }}>
+          <svg width="0" height="0" className="absolute" aria-hidden="true">
+            <clipPath id="flag-wave" clipPathUnits="objectBoundingBox"><motion.path d={flagD} /></clipPath>
+          </svg>
+          <div className="absolute inset-0 overflow-hidden text-white" style={{ clipPath: 'url(#flag-wave)' }} aria-live="polite">
+            {/* photos swap while the flag below covers the card */}
+            <AnimatePresence initial={false} mode="popLayout">
               <motion.img
                 key={p.id} src={img(p.seed, 1920)} alt="" loading="lazy" decoding="async"
                 className="absolute inset-0 h-full w-full object-cover"
-                initial={{ opacity: 0, scale: 1.15, clipPath: 'inset(0 0 100% 0)' }} animate={{ opacity: 1, scale: 1, clipPath: 'inset(0 0 0% 0)' }} exit={{ opacity: 0 }}
-                transition={{ duration: 1.1, ease: [0.76, 0, 0.24, 1] }}
+                initial={{ opacity: 0, scale: 1.06 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, transition: { delay: FLAG_SWAP, duration: 0 } }}
+                transition={{ opacity: { delay: FLAG_SWAP, duration: 0 }, scale: { delay: FLAG_SWAP, duration: 1.6, ease: [0.22, 0.8, 0.2, 1] } }}
               />
             </AnimatePresence>
             <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
-            <div className="absolute inset-x-0 top-0 h-1.5 transition-colors duration-700" style={{ background: p.c }} />
+            {/* a deep Bangladesh flag sweeps across from the pole, then pulls away to reveal the next pillar */}
+            <AnimatePresence initial={false}>
+              <motion.div
+                key={`flag-${p.id}`}
+                ref={flagRef} className="pointer-events-none absolute inset-0 z-[3] overflow-hidden bg-[#006A4E]"
+                initial={{ clipPath: 'inset(0 100% 0 0)' }}
+                animate={{ clipPath: ['inset(0 100% 0 0)', 'inset(0 0% 0 0)', 'inset(0 0% 0 0)', 'inset(0 0 0 100%)'] }}
+                exit={{ opacity: 0, transition: { duration: 0 } }}
+                transition={{ duration: 2, times: [0, 0.38, 0.5, 1], ease: [0.65, 0, 0.35, 1] }}
+                aria-hidden="true"
+              >
+                <svg viewBox="0 0 1 1" preserveAspectRatio="none" className="absolute inset-0 h-full w-full"><motion.path d={discD} fill="#E8263B" /></svg>
+                {/* cloth folds rolling across */}
+                <motion.span
+                  className="absolute inset-0 bg-[repeating-linear-gradient(112deg,rgba(255,255,255,0)_0%,rgba(255,255,255,.22)_4%,rgba(0,0,0,.35)_9%,rgba(255,255,255,.12)_13%,rgba(0,0,0,0)_17%)] bg-[length:220%_100%] mix-blend-soft-light"
+                  initial={{ backgroundPosition: '0% 0%' }} animate={{ backgroundPosition: '100% 0%' }} transition={{ duration: 2, ease: 'linear' }}
+                />
+                <motion.span
+                  className="absolute inset-0 bg-[repeating-linear-gradient(104deg,rgba(0,0,0,0)_0%,rgba(0,0,0,.28)_6%,rgba(255,255,255,.08)_11%,rgba(0,0,0,0)_15%)] bg-[length:180%_100%]"
+                  initial={{ backgroundPosition: '100% 0%' }} animate={{ backgroundPosition: '0% 0%' }} transition={{ duration: 2, ease: 'linear' }}
+                />
+                {/* fine weave */}
+                <span className="absolute inset-0 bg-[repeating-linear-gradient(0deg,rgba(0,0,0,.07)_0_1px,transparent_1px_3px),repeating-linear-gradient(90deg,rgba(255,255,255,.04)_0_1px,transparent_1px_3px)]" />
+                <span className="absolute inset-0 bg-[radial-gradient(120%_90%_at_30%_40%,rgba(255,255,255,.12),rgba(0,0,0,.35))]" />
+              </motion.div>
+            </AnimatePresence>
             <AnimatePresence mode="wait">
-              <motion.div key={p.id} className="absolute inset-x-0 bottom-0 flex flex-col gap-3 p-7 lg:p-10" initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -16 }} transition={{ duration: 0.55, ease: [0.22, 0.8, 0.2, 1] }}>
+              <motion.div key={p.id} className="absolute inset-x-0 bottom-0 flex flex-col gap-3 p-7 pb-14 lg:p-10 lg:pb-16" initial={{ opacity: 0, x: -40 }} animate={{ opacity: 1, x: 0, transition: { delay: FLAG_SWAP + 0.15, duration: 0.8, ease: [0.22, 0.8, 0.2, 1] } }} exit={{ opacity: 0, transition: { duration: 0.3 } }}>
                 <span className="inline-flex w-fit items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold text-white" style={{ background: p.c }}><i className={`fa-solid ${p.icon}`} aria-hidden="true" /> {t(p.aud)}</span>
                 <h3 className="font-mag text-[clamp(34px,4vw,56px)] font-medium leading-[1.05] [html[lang=bn]_&]:font-normal [html[lang=bn]_&]:leading-snug">{t(p.name)}</h3>
                 <p className="max-w-lg text-[15px] text-white/80">{t(p.intro)}</p>
@@ -166,11 +252,12 @@ export function BrandHexagon() {
               </motion.div>
             </AnimatePresence>
             {/* progress pips */}
-            <div className="absolute right-6 top-6 flex gap-1.5">
+            <div className="absolute right-8 top-14 flex gap-1.5">
               {pillars.map((pl, k) => (
                 <button key={pl.id} type="button" onClick={() => pick(k)} aria-label={t(pl.name)} className={cn('h-1.5 rounded-full transition-all duration-500', k === active ? 'w-8 bg-white' : 'w-1.5 bg-white/40 hover:bg-white/70')} />
               ))}
             </div>
+          </div>
           </div>
         </div>
       </div>

@@ -50,8 +50,13 @@ const T = {
   shareBtn: { en: 'Share a story', bn: 'গল্প পাঠান' },
   nlH: { en: 'The new issue, in your inbox every month', bn: 'প্রতি মাসে নতুন সংখ্যা, আপনার ইনবক্সে' },
   nlP: { en: 'The best stories, fresh numbers and each magazine release, in one email a month.', bn: 'বাছাই করা গল্প, নতুন পরিসংখ্যান আর ম্যাগাজিনের নতুন সংখ্যার খবর—মাসে মাত্র একটি ইমেইলে।' },
+  videoPlace: { en: 'Bangladesh from above', bn: 'আকাশ থেকে বাংলাদেশ' },
   scroll: { en: 'Scroll', bn: 'স্ক্রল করুন' },
 };
+
+// hero background: true = looping drone video, false = the photo slideshow (kept intact to switch back)
+const HERO_VIDEO = true;
+const HERO_VIDEO_START = 0; // seconds into the loop for the first play (the loop now opens on the misty-trees shot)
 
 function Hero() {
   const { t, num } = useLang();
@@ -62,41 +67,64 @@ function Hero() {
   const [paused, setPaused] = useState(!!reduce);
 
   useEffect(() => {
-    if (paused) return;
+    if (paused || HERO_VIDEO) return;
     const id = setTimeout(() => setI((v) => (v + 1) % slides.length), 3000);
     return () => clearTimeout(id);
   }, [i, paused, slides.length]);
 
-  const mx = useMotionValue(0);
-  const my = useMotionValue(0);
-  const px = useSpring(useTransform(mx, [-0.5, 0.5], [10, -10]), { stiffness: 170, damping: 26 });
-  const py = useSpring(useTransform(my, [-0.5, 0.5], [7, -7]), { stiffness: 170, damping: 26 });
   const ref = useRef(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start start', 'end start'] });
   const contentY = useTransform(scrollYProgress, [0, 1], [0, 140]);
   const contentO = useTransform(scrollYProgress, [0, 0.7], [1, 0]);
+  const videoRef = useRef(null);
+  // browsers only autoplay muted video, and React does not reliably set the muted attribute, so force it and start playback
+  useEffect(() => {
+    const v = videoRef.current; if (!v) return;
+    v.muted = true; v.defaultMuted = true; v.setAttribute('muted', '');
+    const start = () => v.play().catch(() => {});
+    if (v.readyState >= 2) start(); else v.addEventListener('canplay', start, { once: true });
+    return () => v.removeEventListener('canplay', start);
+  }, []);
+  const togglePause = () => {
+    setPaused((p) => {
+      const v = videoRef.current;
+      if (v) (p ? v.play() : v.pause());
+      return !p;
+    });
+  };
   const lines = t(T.h1).split('<br />');
   const ease = [0.22, 0.8, 0.2, 1];
 
   return (
     <section
       ref={ref}
-      onMouseMove={(e) => { const r = e.currentTarget.getBoundingClientRect(); mx.set((e.clientX - r.left) / r.width - 0.5); my.set((e.clientY - r.top) / r.height - 0.5); }}
       className="grain on-dark relative isolate flex min-h-[calc(100svh-var(--header-h)-3px)] items-end overflow-hidden bg-black text-white"
       aria-label={t(T.eyebrow)}
     >
-      <motion.div className="absolute -inset-8 -z-20" style={{ x: px, y: py }} initial={{ scale: 1.15 }} animate={ready ? { scale: 1 } : undefined} transition={{ duration: 2.2, ease: [0.22, 0.8, 0.2, 1] }}>
+      <motion.div className="absolute inset-0 -z-20" initial={{ scale: 1.08 }} animate={ready ? { scale: 1 } : undefined} transition={{ duration: 2.2, ease: [0.22, 0.8, 0.2, 1] }}>
+        {HERO_VIDEO ? (
+          <video
+            ref={videoRef} className="absolute inset-0 h-full w-full object-cover" autoPlay muted loop playsInline preload="auto"
+            // first play opens on the misty village shot; later loops start from the beginning
+            onLoadedMetadata={(e) => { if (!e.currentTarget.dataset.started) { e.currentTarget.dataset.started = '1'; e.currentTarget.currentTime = HERO_VIDEO_START; } }}
+            poster="/videos/hero-poster.webp" aria-hidden="true"
+          >
+            <source src="/videos/hero-1280.mp4" type="video/mp4" media="(max-width: 1100px)" />
+            <source src="/videos/hero-1920.mp4" type="video/mp4" />
+          </video>
+        ) : (
         <AnimatePresence initial={false}>
           <motion.div key={i} className="absolute inset-0" initial={{ opacity: 0, scale: 1.08, clipPath: 'inset(0 0 0 100%)' }} animate={{ opacity: 1, scale: 1, clipPath: 'inset(0 0 0 0%)' }} exit={{ opacity: 0.6 }} transition={{ duration: 1, ease: [0.76, 0, 0.24, 1] }}>
             <img src={img(slides[i].seed, 1920)} srcSet={slides[i].seed === 'bichana' ? '/photos/bichana-960.webp 960w, /photos/bichana-1920.webp 1920w, /photos/bichana-2880.webp 2880w' : undefined} sizes="100vw" alt="" width="1920" height="1280" fetchpriority={i === 0 ? 'high' : 'auto'} style={{ objectPosition: slides[i].pos || 'center' }} className={cn('h-full w-full object-cover', !paused && 'kenburns')} />
           </motion.div>
         </AnimatePresence>
+        )}
       </motion.div>
       <div className="absolute inset-0 -z-10 bg-[linear-gradient(180deg,rgba(0,0,0,.18)_0%,rgba(0,0,0,0)_35%,rgba(0,0,0,.55)_100%)]" />
       <div className="absolute inset-y-0 left-0 -z-10 w-3/4 bg-[linear-gradient(90deg,rgba(0,0,0,.5)_0%,rgba(0,0,0,.22)_45%,rgba(0,0,0,0)_85%)]" />
 
       {/* slide counter, right edge */}
-      <div className="absolute right-6 top-1/2 z-[2] hidden -translate-y-1/2 flex-col items-center gap-3 lg:flex" aria-hidden="true">
+      <div className={cn('absolute right-6 top-1/2 z-[2] hidden -translate-y-1/2 flex-col items-center gap-3 lg:flex', HERO_VIDEO && '!hidden')} aria-hidden="true">
         <span className="font-mag text-5xl font-medium leading-none">
           <AnimatePresence mode="popLayout"><motion.span key={i} className="block" initial={{ y: 40, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -40, opacity: 0 }} transition={{ duration: 0.6, ease }}>{num(pad(i + 1))}</motion.span></AnimatePresence>
         </span>
@@ -121,14 +149,16 @@ function Hero() {
         </motion.div>
 
         <motion.div className="mt-12 flex flex-wrap items-end justify-between gap-6 border-t border-white/15 pt-5" initial={{ opacity: 0 }} animate={ready ? { opacity: 1 } : undefined} transition={{ delay: 1, duration: 1 }}>
+          {HERO_VIDEO ? <span className="inline-flex items-center gap-2.5 text-[13.5px] text-white/85"><span className="grid h-7 w-7 place-items-center rounded-full bg-white/10 backdrop-blur"><i className="fa-solid fa-location-dot text-[11px] text-brand-yellow" aria-hidden="true" /></span>{t(T.videoPlace)}</span> : (
           <AnimatePresence mode="wait">
             <motion.span key={i} className="inline-flex items-center gap-2.5 text-[13.5px] text-white/85" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.4 }}>
               <span className="grid h-7 w-7 place-items-center rounded-full bg-white/10 backdrop-blur"><i className="fa-solid fa-location-dot text-[11px] text-brand-yellow" aria-hidden="true" /></span>
               {t(slides[i].place)}
             </motion.span>
           </AnimatePresence>
+          )}
           <div className="flex items-center gap-3">
-            <div className="flex gap-1.5 sm:gap-2">
+            <div className={cn('flex gap-1.5 sm:gap-2', HERO_VIDEO && 'hidden')}>
               {slides.map((s, k) => (
                 <button key={s.seed} type="button" aria-label={t(s.place)} aria-current={k === i} onClick={() => setI(k)} className={cn('group relative h-9 sm:h-12 overflow-hidden rounded-[5px] transition-all duration-500 ease-brand', k === i ? 'w-16 ring-1 ring-white/70 sm:w-24' : 'w-7 opacity-60 hover:opacity-100 sm:w-12')}>
                   <img src={img(s.seed, 400)} alt="" className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110" />
@@ -136,7 +166,7 @@ function Hero() {
                 </button>
               ))}
             </div>
-            <button type="button" onClick={() => setPaused((p) => !p)} aria-label={paused ? t(T.play) : t(T.pause)} className="hdr-btn">
+            <button type="button" onClick={togglePause} aria-label={paused ? t(T.play) : t(T.pause)} className="hdr-btn">
               <i className={`fa-solid ${paused ? 'fa-play' : 'fa-pause'} text-xs`} aria-hidden="true" />
             </button>
           </div>
