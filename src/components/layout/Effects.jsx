@@ -7,15 +7,32 @@ export function SmoothScroll() {
   const reduce = useReducedMotion();
   useEffect(() => {
     if (reduce) return;
-    const lenis = new Lenis({ lerp: 0.14, smoothWheel: true, prevent: (node) => !!node.closest?.('[role="dialog"]') });
+    // softer, slower glide between sections
+    const lenis = new Lenis({
+      lerp: 0.075,
+      wheelMultiplier: 0.9,
+      smoothWheel: true,
+      prevent: (node) => !!node.closest?.('[role="dialog"]'),
+    });
     window.__lenis = lenis;
+    // same-page links (#pillars, etc.) glide instead of jumping: stop the browser's instant jump first
+    const onClick = (e) => {
+      const link = e.target.closest?.('a[href^="#"]');
+      if (!link || e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey) return;
+      const el = document.getElementById(decodeURIComponent(link.getAttribute('href').slice(1)));
+      if (!el) return;
+      e.preventDefault();
+      lenis.scrollTo(el, { offset: -90, duration: 1.6, easing: (t) => 1 - Math.pow(1 - t, 4) });
+      history.replaceState(null, '', link.getAttribute('href'));
+    };
+    document.addEventListener('click', onClick, true);
     let raf;
     const loop = (time) => { lenis.raf(time); raf = requestAnimationFrame(loop); };
     raf = requestAnimationFrame(loop);
     const sync = () => (document.body.hasAttribute('data-scroll-locked') || document.body.style.overflow === 'hidden' ? lenis.stop() : lenis.start());
     const mo = new MutationObserver(sync);
     mo.observe(document.body, { attributes: true, attributeFilter: ['data-scroll-locked', 'style'] });
-    return () => { cancelAnimationFrame(raf); mo.disconnect(); lenis.destroy(); window.__lenis = null; };
+    return () => { cancelAnimationFrame(raf); mo.disconnect(); document.removeEventListener('click', onClick, true); lenis.destroy(); window.__lenis = null; };
   }, [reduce]);
   return null;
 }

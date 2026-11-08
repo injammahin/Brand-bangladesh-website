@@ -56,7 +56,6 @@ const T = {
 
 // hero background: true = looping drone video, false = the photo slideshow (kept intact to switch back)
 const HERO_VIDEO = true;
-const HERO_VIDEO_START = 0; // seconds into the loop for the first play (the loop now opens on the misty-trees shot)
 
 function Hero() {
   const { t, num } = useLang();
@@ -105,12 +104,10 @@ function Hero() {
         {HERO_VIDEO ? (
           <video
             ref={videoRef} className="absolute inset-0 h-full w-full object-cover" autoPlay muted loop playsInline preload="auto"
-            // first play opens on the misty village shot; later loops start from the beginning
-            onLoadedMetadata={(e) => { if (!e.currentTarget.dataset.started) { e.currentTarget.dataset.started = '1'; e.currentTarget.currentTime = HERO_VIDEO_START; } }}
             poster="/videos/hero-poster.webp" aria-hidden="true"
           >
-            <source src="/videos/hero-1280.mp4" type="video/mp4" media="(max-width: 1100px)" />
-            <source src="/videos/hero-1920.mp4" type="video/mp4" />
+            <source src="/videos/hero-last-19s-1280.mp4" type="video/mp4" media="(max-width: 1100px)" />
+            <source src="/videos/hero-last-19s-1920.mp4" type="video/mp4" />
           </video>
         ) : (
         <AnimatePresence initial={false}>

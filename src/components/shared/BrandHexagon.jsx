@@ -55,15 +55,7 @@ export function BrandHexagon() {
     return () => ro.disconnect();
   }, []);
 
-  const [hold, setHold] = useState(false);
   const p = pillars[active];
-
-  // gently cycle through the pillars until the visitor takes over
-  useEffect(() => {
-    if (!inView || hold || reduce) return;
-    const id = setTimeout(() => setActive((a) => (a + 1) % pillars.length), 3800);
-    return () => clearTimeout(id);
-  }, [active, hold, inView, reduce, pillars.length]);
 
   // flag shape (pinned at the left like a flag on its pole): one long, smooth wave with parallel top and bottom edges and a straight hoist,
   // like a waving national flag. Units are 0..1 of the card; phase and amplitude drive the waving.
@@ -112,7 +104,7 @@ export function BrandHexagon() {
     return `M${pts.join(' L')} Z`;
   });
 
-  const pick = (k) => { setActive(k); setHold(true); };
+  const pick = (k) => setActive(k);
 
   return (
     <section id="pillars" ref={ref} className="relative isolate scroll-mt-20 overflow-hidden bg-brand-cream py-20 lg:py-28" aria-labelledby="hex-h">
@@ -145,9 +137,9 @@ export function BrandHexagon() {
                   <motion.g
                     key={pl.id}
                     role="button" tabIndex={0} aria-pressed={on} aria-label={t(pl.name)}
-                    onMouseEnter={() => pick(k)} onFocus={() => pick(k)} onClick={() => pick(k)}
+                    onClick={() => pick(k)}
                     onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), pick(k))}
-                    className="group/seg cursor-pointer outline-none"
+                    className="cursor-pointer outline-none"
                     initial={{ opacity: 0, scale: 0.4 }}
                     animate={inView ? { opacity: 1, scale: 1 } : {}}
                     transition={{ opacity: { delay: 0.2 + k * 0.09, duration: 0.6 }, scale: { delay: 0.2 + k * 0.09, duration: 0.8, ease: [0.22, 0.8, 0.2, 1] } }}
@@ -160,7 +152,7 @@ export function BrandHexagon() {
                         style={{ transform: on ? 'scale(1.12)' : 'scale(1)' }}
                       />
                       <rect x="0" y="0" width="400" height="400" fill={pl.c} className="transition-opacity duration-500" style={{ opacity: on ? 0.28 : 0.82 }} />
-                      <rect x="0" y="0" width="400" height="400" fill="url(#hex-frame)" className="opacity-0 mix-blend-overlay transition-opacity duration-500 group-hover/seg:opacity-30" />
+                      <rect x="0" y="0" width="400" height="400" fill="url(#hex-frame)" className="pointer-events-none opacity-0 mix-blend-overlay" />
                     </g>
                     <polygon points={`${C},${C} ${V[k].join(',')} ${V[k + 1].join(',')}`} fill="none" stroke="#FBF8F2" strokeWidth="2" strokeLinejoin="round" />
                   </motion.g>
