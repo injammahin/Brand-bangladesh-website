@@ -76,13 +76,18 @@ function Hero() {
   const contentY = useTransform(scrollYProgress, [0, 1], [0, 140]);
   const contentO = useTransform(scrollYProgress, [0, 0.7], [1, 0]);
   const videoRef = useRef(null);
+  const [videoOn, setVideoOn] = useState(false);
   // browsers only autoplay muted video, and React does not reliably set the muted attribute, so force it and start playback
   useEffect(() => {
     const v = videoRef.current; if (!v) return;
     v.muted = true; v.defaultMuted = true; v.setAttribute('muted', '');
-    const start = () => v.play().catch(() => {});
+    // if the browser blocks autoplay (e.g. battery saver), start on the visitor's first scroll, tap or key
+    const kick = () => { v.play().catch(() => {}); };
+    const evts = ['pointerdown', 'keydown', 'wheel', 'touchstart', 'scroll'];
+    const start = () => v.play().then(() => evts.forEach((e) => window.removeEventListener(e, kick))).catch(() => {});
+    evts.forEach((e) => window.addEventListener(e, kick, { passive: true }));
     if (v.readyState >= 2) start(); else v.addEventListener('canplay', start, { once: true });
-    return () => v.removeEventListener('canplay', start);
+    return () => { v.removeEventListener('canplay', start); evts.forEach((e) => window.removeEventListener(e, kick)); };
   }, []);
   const togglePause = () => {
     setPaused((p) => {
@@ -100,15 +105,18 @@ function Hero() {
       className="grain on-dark relative isolate flex min-h-[calc(100svh-var(--header-h)-3px)] items-end overflow-hidden bg-black text-white"
       aria-label={t(T.eyebrow)}
     >
-      <motion.div className="absolute inset-0 -z-20" initial={{ scale: 1.08 }} animate={ready ? { scale: 1 } : undefined} transition={{ duration: 2.2, ease: [0.22, 0.8, 0.2, 1] }}>
+      <motion.div className="absolute inset-0 -z-20" initial={HERO_VIDEO ? false : { scale: 1.08 }} animate={ready && !HERO_VIDEO ? { scale: 1 } : undefined} transition={{ duration: 2.2, ease: [0.22, 0.8, 0.2, 1] }}>
         {HERO_VIDEO ? (
+          <>
+          <img src="/videos/hero-poster.webp?v=3" alt="" className="absolute inset-0 h-full w-full object-cover" aria-hidden="true" />
           <video
-            ref={videoRef} className="absolute inset-0 h-full w-full object-cover" autoPlay muted loop playsInline preload="auto"
-            poster="/videos/hero-poster.webp" aria-hidden="true"
+            ref={videoRef} onPlaying={() => setVideoOn(true)} className={cn('absolute inset-0 h-full w-full object-cover transition-opacity duration-700', videoOn ? 'opacity-100' : 'opacity-0')} autoPlay muted loop playsInline preload="auto"
+            poster="/videos/hero-poster.webp?v=3" aria-hidden="true"
           >
-            <source src="/videos/hero-last-19s-1280.mp4" type="video/mp4" media="(max-width: 1100px)" />
-            <source src="/videos/hero-last-19s-1920.mp4" type="video/mp4" />
+            <source src="/videos/hero-1280.mp4?v=3" type="video/mp4" media="(max-width: 1100px)" />
+            <source src="/videos/hero-1920.mp4?v=3" type="video/mp4" />
           </video>
+          </>
         ) : (
         <AnimatePresence initial={false}>
           <motion.div key={i} className="absolute inset-0" initial={{ opacity: 0, scale: 1.08, clipPath: 'inset(0 0 0 100%)' }} animate={{ opacity: 1, scale: 1, clipPath: 'inset(0 0 0 0%)' }} exit={{ opacity: 0.6 }} transition={{ duration: 1, ease: [0.76, 0, 0.24, 1] }}>
